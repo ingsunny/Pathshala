@@ -1,7 +1,3 @@
-# Codsoft Web Internship Project
-
-This project was developed as part of the Codsoft Web Development Internship.
-
 ## Pathshal - Online Learning Platform
 
 Pathshal is an online learning platform designed to provide a seamless and interactive learning experience for users. It offers a wide range of courses on various subjects, allowing users to enhance their skills and knowledge from anywhere, at any time.
