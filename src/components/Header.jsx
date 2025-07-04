@@ -186,7 +186,10 @@ const Header = () => {
             </div>
           ) : (
             <>
-              <div className="text-[#333] px-4 py-1 lg:py-2 ">
+              <Link
+                href="/search_courses"
+                className="text-[#333] px-4 py-1 lg:py-2 "
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -201,7 +204,7 @@ const Header = () => {
                     d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
                   />
                 </svg>
-              </div>
+              </Link>
               <Link
                 href="/login"
                 className="border px-4 py-1 lg:py-2 font-medium rounded-sm border-[#0090DF] text-[#35A3E3] hover:bg-[#35A3E3] hover:text-white ease-in-out delay-100 transition-colors duration-200 sm:block hidden"

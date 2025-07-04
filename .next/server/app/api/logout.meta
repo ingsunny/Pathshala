@@ -1,1 +1,0 @@
-{"status":200,"headers":{"content-type":"application/json","set-cookie":"token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly","x-middleware-set-cookie":"token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly","x-next-cache-tags":"_N_T_/layout,_N_T_/api/layout,_N_T_/api/logout/layout,_N_T_/api/logout/route,_N_T_/api/logout"}}

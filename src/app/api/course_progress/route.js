@@ -12,6 +12,8 @@ import {
 } from "@firebase/storage";
 // fixed the error by adding @
 
+import { StandardFonts } from "pdf-lib";
+
 import { app } from "@/firebase";
 
 import { PDFDocument, rgb } from "pdf-lib";
@@ -83,25 +85,19 @@ export async function POST(NextRequest) {
 
     // If user Completed 100% any of course we will generate the Certificate instantly
 
-    if (percentageCompleted == 100) {
+    if (percentageCompleted === 100) {
       function generateCustomCertificateId() {
         const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         const length = 7;
         let customId = "";
-
         for (let i = 0; i < length; i++) {
           const randomIndex = Math.floor(Math.random() * characters.length);
           customId += characters[randomIndex];
         }
-
-        const certificateId = customId + "-PATHSHALA";
-
-        return certificateId;
+        return customId + "-PATHSHALA";
       }
 
       const customCertificateId = generateCustomCertificateId();
-
-      // Protecting from duplication of certificate here
 
       const existingCertificate = await Certificate.findOne({
         user_id: userId,
@@ -109,47 +105,50 @@ export async function POST(NextRequest) {
       });
 
       if (!existingCertificate) {
-        // Creating Pdf for certificate ->
-
         const existingPdfBytes = fs.readFileSync(
           "public/certificate_example.pdf"
         );
         const pdfDoc = await PDFDocument.load(existingPdfBytes);
+        const page = pdfDoc.getPages()[0];
 
-        const page = pdfDoc.getPages()[0]; // Get the first page
+        const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+        const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-        page.drawRectangle({
-          x: 330,
-          y: 430,
-          width: 200,
-          height: 50,
-          color: rgb(1, 1, 1),
-        });
+        const { width, height } = page.getSize();
 
-        page.drawText(user.name, {
-          x: 400,
-          y: 442,
-          size: 27,
-          color: rgb(64 / 255, 64 / 255, 64 / 255), // Black color
-        });
-
-        page.drawRectangle({
-          x: 100,
-          y: 345,
-          width: 700,
-          height: 90,
-          color: rgb(1, 1, 1),
-        });
-
-        page.drawText(
-          `For successfully completing the Pathshala ${course.name} course on`,
-          {
-            x: 230,
-            y: 400,
-            size: 15,
-            color: rgb(51 / 255, 49 / 255, 53 / 255),
-          }
+        // name text
+        const userNameText = user.name;
+        const userNameSize = 27;
+        const userNameWidth = timesRomanFont.widthOfTextAtSize(
+          userNameText,
+          userNameSize
         );
+        const userNameX = (width - userNameWidth) / 2;
+
+        page.drawText(userNameText, {
+          x: userNameX,
+          y: 442,
+          size: userNameSize,
+          font: timesRomanFont,
+          color: rgb(0, 0, 0),
+        });
+
+        // course text
+        const courseText = `For successfully completing the Pathshala ${course.name} course on`;
+        const courseSize = 15;
+        const courseWidth = helveticaFont.widthOfTextAtSize(
+          courseText,
+          courseSize
+        );
+        const courseX = (width - courseWidth) / 2;
+
+        page.drawText(courseText, {
+          x: courseX,
+          y: 400,
+          size: courseSize,
+          font: helveticaFont,
+          color: rgb(51 / 255, 49 / 255, 53 / 255),
+        });
 
         const currentDate = new Date().toLocaleDateString("en-US", {
           year: "numeric",
@@ -157,98 +156,103 @@ export async function POST(NextRequest) {
           day: "numeric",
         });
 
-        page.drawText(`${currentDate}.`, {
-          x: 410,
+        const dateSize = 15;
+        const dateWidth = helveticaFont.widthOfTextAtSize(
+          currentDate,
+          dateSize
+        );
+        const dateX = (width - dateWidth) / 2;
+
+        page.drawText(currentDate, {
+          x: dateX,
           y: 380,
-          size: 15,
+          size: dateSize,
+          font: helveticaFont,
           color: rgb(51 / 255, 49 / 255, 53 / 255),
         });
 
-        page.drawText(
-          "Pathshala wishes you the best for your future endeavours.",
-          {
-            x: 280,
-            y: 340,
-            size: 15,
-            color: rgb(51 / 255, 49 / 255, 53 / 255),
-          }
+        const wishesText =
+          "Pathshala wishes you the best for your future endeavours.";
+        const wishesWidth = helveticaFont.widthOfTextAtSize(
+          wishesText,
+          courseSize
         );
+        const wishesX = (width - wishesWidth) / 2;
 
-        page.drawRectangle({
-          x: 170,
-          y: 80,
-          width: 560,
-          height: 50,
-          color: rgb(1, 1, 1),
+        page.drawText(wishesText, {
+          x: wishesX,
+          y: 340,
+          size: courseSize,
+          font: helveticaFont,
+          color: rgb(51 / 255, 49 / 255, 53 / 255),
         });
 
-        page.drawText(
-          `Verifiy here: ${process.env.NEXT_PUBLIC_API_BASE_URL}/api/verifiy_certificate/`,
-          {
-            x: 250,
-            y: 96,
-            size: 10,
-            color: rgb(141 / 255, 137 / 255, 144 / 255),
-          }
+        const verifyText = `Verify here: ${process.env.NEXT_PUBLIC_API_BASE_URL}verifiy_certificate/`;
+        const verifySize = 10;
+        const verifyWidth = helveticaFont.widthOfTextAtSize(
+          verifyText,
+          verifySize
         );
+        const verifyX = (width - verifyWidth) / 2;
 
-        page.drawText(`Date of certification: ${currentDate}`, {
-          x: 220,
-          y: 120,
-          size: 10,
+        page.drawText(verifyText, {
+          x: verifyX,
+          y: 96,
+          size: verifySize,
+          font: helveticaFont,
           color: rgb(141 / 255, 137 / 255, 144 / 255),
         });
 
-        page.drawText(`Certificate Id: ${customCertificateId}`, {
-          x: 560,
+        // date of certification
+        const certDateText = `Date of certification: ${currentDate}`;
+        const certDateWidth = helveticaFont.widthOfTextAtSize(
+          certDateText,
+          verifySize
+        );
+        const certDateX = (width - certDateWidth) / 2;
+
+        page.drawText(certDateText, {
+          x: certDateX,
           y: 120,
-          size: 10,
+          size: verifySize,
+          font: helveticaFont,
+          color: rgb(141 / 255, 137 / 255, 144 / 255),
+        });
+
+        // certificate ID
+        const certIdText = `Certificate Id: ${customCertificateId}`;
+        const certIdWidth = helveticaFont.widthOfTextAtSize(
+          certIdText,
+          verifySize
+        );
+        const certIdX = (width - certIdWidth) / 2;
+
+        page.drawText(certIdText, {
+          x: certIdX,
+          y: 140,
+          size: verifySize,
+          font: helveticaFont,
           color: rgb(141 / 255, 137 / 255, 144 / 255),
         });
 
         const modifiedPdfBytes = await pdfDoc.save();
 
-        // fs.writeFileSync(
-        //   `certificates/${customCertificateId}.pdf`,
-        //   modifiedPdfBytes
-        // );
-
-        console.log("PDF file modified successfully!");
-
         const storage = getStorage(app);
         const bucket = ref(storage, `certificates/${customCertificateId}.pdf`);
 
-        // Read the PDF file
-        // const pdfFile = fs.readFileSync(
-        //   `certificates/${customCertificateId}.pdf`
-        // );
-
-        // Upload the PDF to Firebase Storage with progress tracking
         const uploadTask = uploadBytesResumable(bucket, modifiedPdfBytes);
 
-        // Listen for state changes, errors, and completion of the upload
         uploadTask.on(
           "state_changed",
           (snapshot) => {
             const progress =
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
             console.log(`Upload is ${progress}% done`);
-            switch (snapshot.state) {
-              case "paused":
-                console.log("Upload is paused");
-                break;
-              case "running":
-                console.log("Upload is running");
-                break;
-            }
           },
           (error) => {
             console.error("Error uploading PDF:", error);
           },
           async () => {
-            console.log("PDF uploaded successfully!");
-
-            // Get the download URL of the uploaded file
             const downloadURL = await getDownloadURL(bucket);
 
             const newCertificate = new Certificate({
@@ -262,6 +266,7 @@ export async function POST(NextRequest) {
             });
 
             await newCertificate.save();
+            console.log("Certificate saved!");
           }
         );
       }
