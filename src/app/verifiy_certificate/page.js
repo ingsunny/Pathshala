@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import axios from "axios";
 import React, { useState } from "react";
 
-const page = () => {
+const CertificateVerificationPage = () => {
   const [verificationId, setVerificationId] = useState("");
   const [certificate, setCertificate] = useState(null);
   const [err, setErr] = useState(false);
@@ -15,15 +15,11 @@ const page = () => {
         verificationId,
       });
 
-      if (response.data.status == 403) {
-        setErr(true);
-        setCertificate(null);
-      } else if (response.data.status == 200) {
-        setErr(false);
-        setCertificate(response.data.certificate);
-      }
-    } catch (err) {
-      console.log(err);
+      setErr(false);
+      setCertificate(response.data.certificate);
+    } catch (error) {
+      setErr(true);
+      setCertificate(null);
     }
   };
 
@@ -98,4 +94,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default CertificateVerificationPage;

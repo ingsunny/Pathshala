@@ -1,46 +1,47 @@
-## Pathshal - Online Learning Platform
+# Pathshala
 
-Pathshal is an online learning platform designed to provide a seamless and interactive learning experience for users. It offers a wide range of courses on various subjects, allowing users to enhance their skills and knowledge from anywhere, at any time.
+Pathshala is a full-stack learning platform built with Next.js, MongoDB, Redux Toolkit, and Tailwind CSS. It includes enrollment, lesson progress, written lesson summaries, a custom video player, timed final assessments, server-side grading, and locally generated PDF certificates.
 
-### Key Features
+## Local setup
 
-- User authorization
-- Course enrollment
-- User progress tracking
-- Quiz functionality
-- Video lectures and content delivery
-- Certificate generation
-- Dynamic PDF certificate creation
-- Firebase integration for certificate storage
+1. Copy `.env.example` to `.env` and replace the development secrets.
+2. Start MongoDB:
 
-<!-- ## Blogger - Content Management System (CMS)
+   ```bash
+   docker compose up -d
+   ```
 
-Blogger is a CMS tailored for managing blog content. It provides an intuitive interface for creating, editing, and publishing blog posts. It also offers features for managing user comments and interactions.
+3. Install dependencies and load the canonical course content:
 
-### Key Features
-- Blog post management (creation, editing, deletion)
-- User comment management
-- Rich text editor for content creation
-- Firebase integration for content storage
+   ```bash
+   npm install
+   npm run db:seed-content
+   npm run db:migrate-certificates
+   ```
 
-## Technologies Used
+4. Start the application:
 
-- Frontend: React, Tailwind CSS
-- Backend: Node.js, Express.js
-- Database: MongoDB
-- Other technologies: Firebase, PDF-lib -->
+   ```bash
+   npm run dev
+   ```
 
-## Contributing
+Open [http://localhost:3000](http://localhost:3000).
 
-I welcome contributions to improve this project. To contribute, follow these steps:
+## Learning model
 
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/improvement`)
-3. Make your changes
-4. Commit your changes (`git commit -am 'Add new feature'`)
-5. Push to the branch (`git push origin feature/improvement`)
-6. Create a new Pull Request
+- `courses` is the canonical source for syllabi, lesson content, video URLs, and protected assessment answer keys.
+- A user stores lightweight enrollments with a course reference, completed lesson IDs, and assessment results. Course content is not duplicated into user records.
+- All lessons must be complete before the 45-minute final assessment unlocks.
+- Assessments are graded on the server. A score of 70% or higher issues a certificate under `public/uploads/certificates`.
+- The content seed is idempotent and preserves stable lesson and question IDs when rerun.
 
-## License
+## Quality checks
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+```bash
+npm run lint
+npm run build
+npm run test:e2e
+npm audit
+```
+
+The Playwright suite exercises public pages, authentication boundaries, responsive dashboard and learning flows, manual and automatic lesson navigation, protected assessment grading, and local certificate delivery on desktop and mobile viewports.

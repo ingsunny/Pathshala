@@ -6,7 +6,6 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { signInSuccess } from "@/redux/user/userSlice";
 import toast from "react-hot-toast";
-import { Toaster } from "react-hot-toast";
 
 const OAuth = () => {
   const router = useRouter();
@@ -22,12 +21,10 @@ const OAuth = () => {
 
       const result = await signInWithPopup(auth, provider);
 
-      const { email, displayName: username, photoURL } = result.user;
+      const idToken = await result.user.getIdToken();
 
       const response = await axios.post(`/api/signin_google/`, {
-        name: username,
-        email: email,
-        photoUrl: photoURL,
+        idToken,
       });
 
       if (response.status === 200) {
@@ -43,31 +40,18 @@ const OAuth = () => {
   };
 
   return (
-    <>
       <button
         onClick={handleGoogleClick}
-        type="submit"
-        className="flex w-full items-center py-2 hover:bg-[#d5d5d526] font-medium text-[#4c4c4c]  px-1 rounded-sm gap-1 justify-center border text-[0.9rem]"
+        type="button"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
       >
         <img
           className="w-4 object-contain"
           src="/google-signin.png"
-          alt="google"
+          alt=""
         />
         Continue with Google
       </button>
-      <Toaster
-        position="bottom-right"
-        reverseOrder={false}
-        toastOptions={{
-          duration: 2000,
-          style: {
-            background: "#404040",
-            color: "#fff",
-          },
-        }}
-      />
-    </>
   );
 };
 

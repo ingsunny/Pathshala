@@ -1,6 +1,5 @@
 "use client";
 import axios from "axios";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
@@ -157,4 +156,4 @@ const Categories = ({ loadingSkeleton }) => {
   );
 };
 
-export default dynamic(() => Promise.resolve(Categories), { ssr: false });
+export default Categories;

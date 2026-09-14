@@ -90,7 +90,7 @@ const Testimonials = () => {
                   Pathshala Trainings, the courses were affordable with great
                   content. The best part was that they provided me with a lot of
                   practical projects to work on, which landed me my first
-                  internship! I'll be forever grateful to Pathshala!
+                  internship! I&apos;ll be forever grateful to Pathshala!
                 </p>
                 <span className="flex">
                   <svg
@@ -175,7 +175,7 @@ const Testimonials = () => {
                   Pathshala Trainings, the courses were affordable with great
                   content. The best part was that they provided me with a lot of
                   practical projects to work on, which landed me my first
-                  internship! I'll be forever grateful to Pathshala!
+                  internship! I&apos;ll be forever grateful to Pathshala!
                 </p>
                 <span className="flex">
                   <svg

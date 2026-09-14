@@ -1,218 +1,170 @@
 "use client";
-import Header from "@/components/Header";
-import OAuth from "@/components/OAuth";
-import {
-  signInFailure,
-  signInStart,
-  signInSuccess,
-} from "@/redux/user/userSlice";
-import axios from "axios";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { Toaster } from "react-hot-toast";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
 
-const page = () => {
+import {
+  AcademicCapIcon,
+  ArrowLeftIcon,
+  CheckCircleIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  LockClosedIcon,
+} from "@heroicons/react/24/outline";
+import axios from "axios";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import OAuth from "@/components/OAuth";
+import { signInFailure, signInStart, signInSuccess } from "@/redux/user/userSlice";
+
+export default function LoginPage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.user);
+  const { loading, sessionStatus } = useSelector((state) => state.user);
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  useEffect(() => {
+    if (sessionStatus === "authenticated") router.replace("/dashboard");
+  }, [router, sessionStatus]);
 
-  // Handle form input changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
-  };
+  function handleChange(event) {
+    setFormData((value) => ({ ...value, [event.target.name]: event.target.value }));
+  }
 
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const signIn = async () => {
-      try {
-        dispatch(signInStart());
+  async function handleSubmit(event) {
+    event.preventDefault();
+    dispatch(signInStart());
 
-        const response = await axios.post(`/api/login`, formData);
-
-        dispatch(signInSuccess(response.data.user));
-        toast.success("Login successful");
-        router.push("/dashboard");
-      } catch (err) {
-        toast.error(err.response?.data?.message || "Unable to log in");
-        dispatch(signInFailure());
-      }
-    };
-
-    signIn();
-  };
+    try {
+      const response = await axios.post("/api/login", formData);
+      dispatch(signInSuccess(response.data.user));
+      toast.success("Welcome back");
+      router.replace("/dashboard");
+    } catch (error) {
+      dispatch(signInFailure());
+      toast.error(error.response?.data?.message || "Unable to log in");
+    }
+  }
 
   return (
-    <>
-      <Header />
-      <section className="py-20 lg:py-28 grid place-content-center px-5">
-        <div className="bg-white max-w-[370px] mt-10 lg:mt-0 h-fit p-5 rounded-lg border">
-          <h2 className="text-lg font-semibold pb-3">Login to your account</h2>
-          <OAuth />
-          <form onSubmit={handleSubmit} className="pt-4">
-            <fieldset className="border-t py-3 flex flex-col gap-3">
-              <legend className="text-center  text-[#676767] text-[0.78rem]">
-                OR
-              </legend>
-              <div className="flex flex-col ">
-                <label className="text-[0.95rem]" htmlFor="email">
-                  Email Id:
-                </label>
+    <main className="min-h-screen bg-slate-50 lg:grid lg:grid-cols-[1.05fr_0.95fr]">
+      <section className="relative hidden min-h-screen overflow-hidden bg-slate-950 p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
+        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-sky-500/20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-indigo-500/20 blur-3xl" />
+        <Link href="/" className="relative z-10 w-fit rounded-xl bg-white px-4 py-2">
+          <Image src="/newLogo.png" alt="Pathshala" width={951} height={262} style={{ width: 150, height: "auto" }} priority />
+        </Link>
+
+        <div className="relative z-10 max-w-xl">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-sky-200">
+            <AcademicCapIcon className="h-5 w-5" /> Learn without limits
+          </span>
+          <h1 className="mt-7 text-5xl font-bold leading-tight tracking-tight xl:text-6xl">
+            Continue building the career you want.
+          </h1>
+          <p className="mt-6 max-w-lg text-lg leading-8 text-slate-300">
+            Practical lessons, visible progress, and certificates that help you move forward.
+          </p>
+          <div className="mt-9 grid gap-4 text-sm text-slate-200 sm:grid-cols-2">
+            {["Learn at your own pace", "Track every completed lesson", "Resume exactly where you stopped", "Earn verified certificates"].map((item) => (
+              <span key={item} className="flex items-center gap-2">
+                <CheckCircleIcon className="h-5 w-5 text-emerald-400" /> {item}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <p className="relative z-10 text-sm text-slate-500">© {new Date().getFullYear()} Pathshala Learning</p>
+      </section>
+
+      <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-10">
+        <div className="w-full max-w-md">
+          <div className="mb-10 flex items-center justify-between lg:hidden">
+            <Link href="/" aria-label="Back home" className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-600">
+              <ArrowLeftIcon className="h-5 w-5" />
+            </Link>
+            <Image src="/newLogo.png" alt="Pathshala" width={951} height={262} style={{ width: 140, height: "auto" }} priority />
+            <span className="w-10" />
+          </div>
+
+          <div>
+            <p className="text-sm font-bold text-sky-600">Welcome back</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Sign in to keep learning</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-500">Enter your details to return to your courses and progress.</p>
+          </div>
+
+          <div className="mt-8">
+            <OAuth />
+          </div>
+
+          <div className="my-7 flex items-center gap-4">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">or use email</span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Email address</span>
+              <input
+                type="email"
+                name="email"
+                autoComplete="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="you@example.com"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">Password</span>
+              <span className="relative block">
+                <LockClosedIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                 <input
-                  className="border  w-[100%] text-[0.92rem] outline-none px-3 py-1 rounded-sm text-gray-500"
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="john@gmail.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-                  title="Please enter a valid email address"
-                  minLength="5"
-                  maxLength="50"
-                />
-              </div>
-              <div className="flex flex-col ">
-                <label className="text-[0.95rem]" htmlFor="password">
-                  Password:
-                </label>
-                <input
-                  className="border  w-[100%] text-[0.92rem] outline-none px-3 py-1 rounded-sm text-gray-500"
-                  type="password"
-                  id="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
+                  autoComplete="current-password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Must be at least 6 characters"
                   required
-                  minLength="8"
-                  maxLength="50"
-                  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-                  title="Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one digit, and one special character."
+                  placeholder="Enter your password"
+                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
                 />
-              </div>
-              <a className="text-right text-sm font-semibold text-[#4195c5]">
-                Forgot password?
-              </a>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-700"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                </button>
+              </span>
+            </label>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex w-full items-center justify-center rounded-xl bg-slate-950 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-sky-600 disabled:cursor-wait disabled:opacity-70"
+            >
               {loading ? (
-                <button
-                  disabled
-                  className="bg-[#00a5ece7] flex items-center gap-2 justify-center py-2 rounded-sm text-white "
-                  type="submit"
-                >
-                  {" "}
-                  Login Now
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    id="loading"
-                    className="w-6 h-6 animate-spin "
-                  >
-                    <circle
-                      cx="17.8"
-                      cy="6.2"
-                      r="2"
-                      fill="#ffffff"
-                      fill-opacity=".9"
-                    ></circle>
-                    <circle
-                      cx="12"
-                      cy="4"
-                      r="2"
-                      fill="#ffffff"
-                      fill-opacity=".8"
-                    ></circle>
-                    <circle
-                      cx="6.2"
-                      cy="6.2"
-                      r="2"
-                      fill="#ffffff"
-                      fill-opacity=".7"
-                    ></circle>
-                    <circle
-                      cx="4"
-                      cy="12"
-                      r="2"
-                      fill="#ffffff"
-                      fill-opacity=".6"
-                    ></circle>
-                    <circle
-                      cx="6.2"
-                      cy="17.6"
-                      r="2"
-                      fill="#ffffff"
-                      fill-opacity=".5"
-                    ></circle>
-                    <circle
-                      cx="12"
-                      cy="20"
-                      r="2"
-                      fill="#ffffff"
-                      fill-opacity=".4"
-                    ></circle>
-                    <circle
-                      cx="17.8"
-                      cy="17.6"
-                      r="2"
-                      fill="#ffffff"
-                      fill-opacity=".3"
-                    ></circle>
-                    <circle
-                      cx="20"
-                      cy="12"
-                      r="2"
-                      fill="#ffffff"
-                      fill-opacity=".2"
-                    ></circle>
-                  </svg>
-                </button>
+                <><span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> Signing in…</>
               ) : (
-                <button
-                  className="bg-[#00A5EC] hover:bg-[#008fcc] py-2 rounded-sm text-white "
-                  type="submit"
-                >
-                  Login Now
-                </button>
+                "Sign in"
               )}
-              <p className="text-sm text-[#222]">
-                Not registered yet? Select the skill that you want to learn and
-                sign up.{" "}
-                <a href="/" className="font-semibold text-[#4195c5]">
-                  View all trainings
-                </a>
-              </p>
-            </fieldset>
+            </button>
           </form>
+
+          <p className="mt-7 text-center text-sm text-slate-500">
+            New to Pathshala?{" "}
+            <Link href="/search_courses" className="font-bold text-sky-700 hover:text-sky-900">Choose a course to get started</Link>
+          </p>
         </div>
       </section>
-      <Toaster
-        position="bottom-right"
-        reverseOrder={false}
-        toastOptions={{
-          duration: 2000,
-          style: {
-            background: "#404040",
-            color: "#fff",
-          },
-        }}
-      />
-    </>
+      <Toaster position="bottom-right" toastOptions={{ duration: 2500 }} />
+    </main>
   );
-};
-
-export default page;
+}

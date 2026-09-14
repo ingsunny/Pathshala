@@ -19,14 +19,14 @@ const Hero = () => {
     <div className="bg-[#EEFBFF] px-5 xl:px-0 pt-36 md:pt-48 lg:pb-0 pb-10">
       <section className="max-w-screen-xl m-auto">
         <div className="text-center">
-          <div className="text-[2.6rem] sm:text-[3rem] font-bold">
+          <h1 className="text-[2.6rem] sm:text-[3rem] font-bold">
             Give the{" "}
             <div className="relative inline-block">
               Best Start
               <div className="absolute overflow-hidden w-full -bottom-[0.4rem]">
                 <Image
-                  style={{ transitionDuration: "1.5s" }}
-                  className={` -bottom-[0.2rem] w-full left-1 h-[1.2rem] transition-all ease-in-out ${
+                  style={{ transitionDuration: "1.5s", width: "100%", height: "auto" }}
+                  className={`-bottom-[0.2rem] left-1 transition-all ease-in-out ${
                     animate ? "opacity-100" : "opacity-0"
                   }`}
                   src="/blue-line.png"
@@ -37,7 +37,7 @@ const Hero = () => {
               </div>
             </div>{" "}
             to Your Career
-          </div>
+          </h1>
           <p className="text-[1.375rem] text-[#484848] py-[1.6rem]">
             Learn, practice, and get hired!
           </p>

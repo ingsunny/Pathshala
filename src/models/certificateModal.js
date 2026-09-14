@@ -6,12 +6,14 @@ const certificateSchema = mongoose.Schema({
   course_id: { type: String },
   course_name: { type: String },
   course_category: { type: String },
-  certificateId: { type: String },
+  certificateId: { type: String, unique: true, index: true },
   certificateDownloadUrl: {
     type: String,
-    default:
-      "https://drive.google.com/file/d/1QZcw0o7L7GTbrS0GRA4YJeyp_rEVruTC/view?usp=sharing",
+    required: true,
   },
+  assessment_score: { type: Number },
+  storageProvider: { type: String, default: "local" },
+  archivedSourceUrl: { type: String },
   date_of_completion: {
     type: Date,
     default: Date.now,

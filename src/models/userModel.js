@@ -1,101 +1,50 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Please Provide a username"],
+const assessmentResultSchema = new mongoose.Schema(
+  {
+    status: {
+      type: String,
+      enum: ["not_started", "in_progress", "passed", "failed"],
+      default: "not_started",
+    },
+    attempts: { type: Number, default: 0 },
+    bestScore: { type: Number, default: 0 },
+    lastScore: { type: Number, default: 0 },
+    startedAt: Date,
+    expiresAt: Date,
+    submittedAt: Date,
   },
+  { _id: false }
+);
+
+const enrollmentSchema = new mongoose.Schema(
+  {
+    courseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+      required: true,
+    },
+    completedTopicIds: [{ type: mongoose.Schema.Types.ObjectId }],
+    progressPercent: { type: Number, default: 0, min: 0, max: 100 },
+    assessmentResult: { type: assessmentResultSchema, default: () => ({}) },
+    enrolledAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: [true, "Please provide a name"] },
   email: {
     type: String,
-    required: [true, "Please Provide a email"],
+    required: [true, "Please provide an email"],
     unique: true,
   },
-  password: {
-    type: String,
-    required: [true, "Please Provide a password"],
-  },
-  phone: {
-    type: String,
-  },
-  photoUrl: {
-    type: String,
-    default: "/default-user.png",
-  },
-  isVerified: {
-    type: Boolean,
-    default: false,
-  },
-  isAdmin: {
-    type: Boolean,
-    default: false,
-  },
-  courses: [
-    {
-      category: {
-        type: String,
-        required: true,
-      },
-      name: {
-        type: String,
-        required: true,
-      },
-      duration: {
-        type: String,
-        required: true,
-      },
-      img1: {
-        type: String,
-        default: "/android.png.webp",
-      },
-      img2: {
-        type: String,
-        default: "/android.png.webp",
-      },
-      description: {
-        type: String,
-        required: true,
-      },
-      syllabus: [
-        {
-          chapter: {
-            type: String,
-            required: true,
-          },
-          topics: [
-            {
-              topicName: {
-                type: String,
-                required: true,
-              },
-              topicLink: {
-                type: String,
-                required: true,
-              },
-              topicProgress: {
-                type: Boolean,
-                default: false,
-              },
-            },
-          ],
-        },
-      ],
-      progress_status: {
-        type: Number,
-        default: 0,
-      },
-      createdAt: {
-        type: Date,
-        default: Date.now,
-      },
-      certificates: [
-        {
-          certificateId: {
-            type: String,
-          },
-        },
-      ],
-    },
-  ],
+  password: { type: String, required: [true, "Please provide a password"] },
+  phone: String,
+  photoUrl: { type: String, default: "/default-user.png" },
+  isVerified: { type: Boolean, default: false },
+  isAdmin: { type: Boolean, default: false },
+  enrollments: { type: [enrollmentSchema], default: [] },
 });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);

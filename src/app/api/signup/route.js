@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import {
   createSessionToken,
-  safeUser,
   SESSION_COOKIE,
   sessionCookieOptions,
 } from "@/lib/auth";
 import User from "@/models/userModel";
+import { getUserView } from "@/lib/user-view";
 
 export async function POST(request) {
   try {
@@ -16,6 +16,19 @@ export async function POST(request) {
     if (!firstName || !lastName || !email || !password) {
       return NextResponse.json(
         { message: "Please complete all required fields" },
+        { status: 400 }
+      );
+    }
+
+    if (
+      password.length < 8 ||
+      !/[A-Z]/.test(password) ||
+      !/[a-z]/.test(password) ||
+      !/\d/.test(password) ||
+      !/[^A-Za-z0-9]/.test(password)
+    ) {
+      return NextResponse.json(
+        { message: "Password must include upper and lowercase letters, a number, and a symbol" },
         { status: 400 }
       );
     }
@@ -39,7 +52,7 @@ export async function POST(request) {
     });
 
     const response = NextResponse.json(
-      { message: "Account created", user: safeUser(user) },
+      { message: "Account created", user: await getUserView(user) },
       { status: 201 }
     );
     response.cookies.set(

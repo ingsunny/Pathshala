@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
-import { readSession, safeUser } from "@/lib/auth";
+import { readSession } from "@/lib/auth";
+import { getUserView } from "@/lib/user-view";
 import Course from "@/models/courseModel";
 import User from "@/models/userModel";
 
@@ -26,16 +27,16 @@ export async function POST(request) {
       return NextResponse.json({ message: "User or course not found" }, { status: 404 });
     }
 
-    if (user.courses.some((item) => item._id.toString() === courseId)) {
+    if (user.enrollments.some((item) => item.courseId.toString() === courseId)) {
       return NextResponse.json({ message: "Already enrolled" }, { status: 409 });
     }
 
-    user.courses.push(course.toObject());
+    user.enrollments.push({ courseId: course._id });
     await user.save();
 
     return NextResponse.json({
       message: "Course enrolled",
-      user: safeUser(user),
+      user: await getUserView(user),
     });
   } catch (error) {
     console.error("Course enrollment failed", error);

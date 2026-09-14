@@ -22,12 +22,11 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { logOut } from "@/redux/user/userSlice";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
 
 const Header = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, sessionStatus } = useSelector((state) => state.user);
 
   const { courses } = useSelector((state) => state.courses);
 
@@ -160,10 +159,10 @@ const Header = () => {
                   <div className="py-3 px-2 text-sm/6 flex flex-col gap-2">
                     <div>
                       <h3 className="text-sm font-semibold px-2">
-                        Sunny Patel
+                        {currentUser.name}
                       </h3>
                       <p className=" font-light text-gray-600  px-2 ">
-                        sunnypatel.koder@gmail.com
+                        {currentUser.email}
                       </p>
                     </div>
                     <div>
@@ -173,17 +172,20 @@ const Header = () => {
                       >
                         <DashboardIcon /> Dashboard
                       </Link>
-                      <div
+                      <button
+                        type="button"
                         onClick={logout}
-                        className="flex items-center gap-2 text-sm px-2 py-2 text-gray-800 hover:bg-gray-100"
+                        className="flex w-full items-center gap-2 px-2 py-2 text-left text-sm text-gray-800 hover:bg-gray-100"
                       >
                         <ArrowLeftIcon /> Logout
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </PopoverPanel>
               </Popover>
             </div>
+          ) : sessionStatus === "loading" ? (
+            <div className="h-9 w-24 animate-pulse rounded-lg bg-slate-100" aria-label="Loading account" />
           ) : (
             <>
               <Link
@@ -365,4 +367,4 @@ const Header = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(Header), { ssr: false });
+export default Header;

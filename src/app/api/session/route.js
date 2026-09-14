@@ -1,7 +1,10 @@
 import { connect } from "@/dbConfig/dbConfig";
-import { readSession, safeUser } from "@/lib/auth";
+import { readSession } from "@/lib/auth";
+import { getUserView } from "@/lib/user-view";
 import User from "@/models/userModel";
 import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request) {
   try {
@@ -18,7 +21,7 @@ export async function GET(request) {
       return NextResponse.json({ user: null }, { status: 401 });
     }
 
-    return NextResponse.json({ user: safeUser(user) });
+    return NextResponse.json({ user: await getUserView(user) });
   } catch (error) {
     console.error("Session lookup failed", error);
     return NextResponse.json({ user: null }, { status: 500 });

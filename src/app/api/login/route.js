@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import {
   createSessionToken,
-  safeUser,
   SESSION_COOKIE,
   sessionCookieOptions,
 } from "@/lib/auth";
 import User from "@/models/userModel";
+import { getUserView } from "@/lib/user-view";
 
 export async function POST(request) {
   try {
@@ -32,7 +32,7 @@ export async function POST(request) {
 
     const response = NextResponse.json({
       message: "Login successful",
-      user: safeUser(user),
+      user: await getUserView(user),
     });
     response.cookies.set(
       SESSION_COOKIE,

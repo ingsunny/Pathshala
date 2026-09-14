@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { use, useMemo, useState } from "react";
 
 import {
   Accordion,
@@ -12,7 +12,6 @@ import Footer from "@/components/Footer";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
 import toast from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
 import { loadingState, signInSuccess } from "@/redux/user/userSlice";
@@ -21,7 +20,8 @@ import OAuth from "@/components/OAuth";
 import Aside from "@/components/Aside";
 import Header from "@/components/Header";
 
-const page = ({ params }) => {
+const CourseDetailsPage = ({ params }) => {
+  const { courseId } = use(params);
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -29,8 +29,8 @@ const page = ({ params }) => {
   const { currentUser, loading } = useSelector((state) => state.user);
 
   const course = useMemo(
-    () => courses?.find((item) => item._id === params.courseId),
-    [courses, params.courseId]
+    () => courses?.find((item) => item._id === courseId),
+    [courses, courseId]
   );
 
   const [formData, setFormData] = useState({
@@ -63,7 +63,7 @@ const page = ({ params }) => {
         toast.success("Signup Successful!");
 
         const enrollResponse = await axios.post(`/api/enroll_course`, {
-          courseId: params.courseId,
+          courseId,
         });
 
         if (enrollResponse.status === 200) {
@@ -101,7 +101,7 @@ const page = ({ params }) => {
     dispatch(loadingState(true));
     try {
       const enrollResponse = await axios.post(`/api/enroll_course`, {
-        courseId: params.courseId,
+        courseId,
       });
 
       if (enrollResponse.status === 200) {
@@ -119,7 +119,7 @@ const page = ({ params }) => {
         chooseBatch: "",
       });
     } catch (error) {
-      if (error.response.status === 409) {
+      if (error.response?.status === 409) {
         toast.success("You have already enrolled in this Course!");
         setTimeout(() => {
           router.push("/dashboard");
@@ -355,56 +355,56 @@ const page = ({ params }) => {
                           cy="6.2"
                           r="2"
                           fill="#ffffff"
-                          fill-opacity=".9"
+                          fillOpacity=".9"
                         ></circle>
                         <circle
                           cx="12"
                           cy="4"
                           r="2"
                           fill="#ffffff"
-                          fill-opacity=".8"
+                          fillOpacity=".8"
                         ></circle>
                         <circle
                           cx="6.2"
                           cy="6.2"
                           r="2"
                           fill="#ffffff"
-                          fill-opacity=".7"
+                          fillOpacity=".7"
                         ></circle>
                         <circle
                           cx="4"
                           cy="12"
                           r="2"
                           fill="#ffffff"
-                          fill-opacity=".6"
+                          fillOpacity=".6"
                         ></circle>
                         <circle
                           cx="6.2"
                           cy="17.6"
                           r="2"
                           fill="#ffffff"
-                          fill-opacity=".5"
+                          fillOpacity=".5"
                         ></circle>
                         <circle
                           cx="12"
                           cy="20"
                           r="2"
                           fill="#ffffff"
-                          fill-opacity=".4"
+                          fillOpacity=".4"
                         ></circle>
                         <circle
                           cx="17.8"
                           cy="17.6"
                           r="2"
                           fill="#ffffff"
-                          fill-opacity=".3"
+                          fillOpacity=".3"
                         ></circle>
                         <circle
                           cx="20"
                           cy="12"
                           r="2"
                           fill="#ffffff"
-                          fill-opacity=".2"
+                          fillOpacity=".2"
                         ></circle>
                       </svg>
                     </button>
@@ -628,56 +628,56 @@ const page = ({ params }) => {
                             cy="6.2"
                             r="2"
                             fill="#ffffff"
-                            fill-opacity=".9"
+                            fillOpacity=".9"
                           ></circle>
                           <circle
                             cx="12"
                             cy="4"
                             r="2"
                             fill="#ffffff"
-                            fill-opacity=".8"
+                            fillOpacity=".8"
                           ></circle>
                           <circle
                             cx="6.2"
                             cy="6.2"
                             r="2"
                             fill="#ffffff"
-                            fill-opacity=".7"
+                            fillOpacity=".7"
                           ></circle>
                           <circle
                             cx="4"
                             cy="12"
                             r="2"
                             fill="#ffffff"
-                            fill-opacity=".6"
+                            fillOpacity=".6"
                           ></circle>
                           <circle
                             cx="6.2"
                             cy="17.6"
                             r="2"
                             fill="#ffffff"
-                            fill-opacity=".5"
+                            fillOpacity=".5"
                           ></circle>
                           <circle
                             cx="12"
                             cy="20"
                             r="2"
                             fill="#ffffff"
-                            fill-opacity=".4"
+                            fillOpacity=".4"
                           ></circle>
                           <circle
                             cx="17.8"
                             cy="17.6"
                             r="2"
                             fill="#ffffff"
-                            fill-opacity=".3"
+                            fillOpacity=".3"
                           ></circle>
                           <circle
                             cx="20"
                             cy="12"
                             r="2"
                             fill="#ffffff"
-                            fill-opacity=".2"
+                            fillOpacity=".2"
                           ></circle>
                         </svg>
                       </button>
@@ -993,4 +993,4 @@ const page = ({ params }) => {
   );
 };
 
-export default page;
+export default CourseDetailsPage;

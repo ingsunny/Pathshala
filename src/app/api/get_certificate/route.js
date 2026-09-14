@@ -3,6 +3,8 @@ import { connect } from "@/dbConfig/dbConfig";
 import { readSession } from "@/lib/auth";
 import Certificate from "@/models/certificateModal";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
     const session = readSession(request);
