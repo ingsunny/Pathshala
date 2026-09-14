@@ -1,71 +1,48 @@
-import { connect } from "@/dbConfig/dbConfig";
-import User from "@/models/userModel";
-import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
-// import { sendEmail } from "@/helpers/mailer";
+import { NextResponse } from "next/server";
+import { connect } from "@/dbConfig/dbConfig";
+import {
+  createSessionToken,
+  safeUser,
+  SESSION_COOKIE,
+  sessionCookieOptions,
+} from "@/lib/auth";
+import User from "@/models/userModel";
 
-connect();
-
-export async function POST(NextRequest) {
+export async function POST(request) {
   try {
-    const reqBody = await NextRequest.json();
+    const { email, password } = await request.json();
 
-    console.log(reqBody);
-
-    const { email, password } = reqBody;
-
-    //check if user already exist
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return NextResponse.json({
-        message: "User Not Found",
-        success: false,
-        status: 404,
-      });
+    if (!email || !password) {
+      return NextResponse.json(
+        { message: "Email and password are required" },
+        { status: 400 }
+      );
     }
 
-    // check if password is correct
-    const validPassword = await bcryptjs.compare(password, user.password);
+    await connect();
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
 
-    if (!validPassword) {
-      return NextResponse.json({
-        message: "Invalid Password",
-        success: false,
-        status: 400,
-      });
+    if (!user || !(await bcryptjs.compare(password, user.password))) {
+      return NextResponse.json(
+        { message: "Invalid email or password" },
+        { status: 401 }
+      );
     }
-
-    const { password: hashedPassword, ...rest } = user._doc;
-
-    // create token data
-
-    const tokenData = {
-      id: user._id,
-      username: user.username,
-      email: user.email,
-    };
-
-    // create token
-    const token = jwt.sign(tokenData, "slfjskdfowru030nfowe", {
-      expiresIn: "1d",
-    });
 
     const response = NextResponse.json({
       message: "Login successful",
-      success: true,
-      status: 200,
-      user: rest,
+      user: safeUser(user),
     });
-
-    response.cookies.set("token", token, {
-      httpOnly: true,
-    });
+    response.cookies.set(
+      SESSION_COOKIE,
+      createSessionToken(user),
+      sessionCookieOptions()
+    );
 
     return response;
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Login failed", error);
+    return NextResponse.json({ message: "Unable to log in" }, { status: 500 });
   }
 }

@@ -43,23 +43,11 @@ const page = () => {
 
         const response = await axios.post(`/api/login`, formData);
 
-        if (response.data.status == 404) {
-          toast.error("User Not Found!");
-          toast.error("Try Signin First!");
-        } else if (response.data.status == 400) {
-          toast.error("Invalid Credential");
-        } else if (response.data.status == 200) {
-          toast.success("Login Successfull!");
-          setTimeout(() => {
-            router.push("/dashboard");
-          }, 2100);
-        }
-
         dispatch(signInSuccess(response.data.user));
-
-        console.log(response.data);
+        toast.success("Login successful");
+        router.push("/dashboard");
       } catch (err) {
-        console.log(err.response.data);
+        toast.error(err.response?.data?.message || "Unable to log in");
         dispatch(signInFailure());
       }
     };
@@ -227,4 +215,4 @@ const page = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(page), { ssr: false });
+export default page;

@@ -11,9 +11,7 @@ const Certificates = () => {
   useEffect(() => {
     const handleCertificate = async () => {
       try {
-        const response = await axios.post(`/api/get_certificate/`, {
-          userId: currentUser._id,
-        });
+        const response = await axios.get(`/api/get_certificate/`);
         setCertificates(response.data.certificates);
       } catch (err) {
         console.log(err);
@@ -22,8 +20,6 @@ const Certificates = () => {
 
     handleCertificate();
   }, [currentUser?._id]);
-
-  console.log("here", certificates);
 
   return (
     <div className="pb-6 pt-5 md:pb-6 md:pt-6">
@@ -54,7 +50,7 @@ const Certificates = () => {
           </thead>
           <tbody>
             {certificates?.map((item, index) => (
-              <tr className="bg-white border-b  hover:bg-gray-50 ">
+              <tr key={item._id} className="bg-white border-b hover:bg-gray-50">
                 <th
                   scope="row"
                   className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"

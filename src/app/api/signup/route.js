@@ -1,52 +1,58 @@
-import { connect } from "@/dbConfig/dbConfig";
-import User from "@/models/userModel";
-import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
-// import { sendEmail } from "@/helpers/mailer";
+import { NextResponse } from "next/server";
+import { connect } from "@/dbConfig/dbConfig";
+import {
+  createSessionToken,
+  safeUser,
+  SESSION_COOKIE,
+  sessionCookieOptions,
+} from "@/lib/auth";
+import User from "@/models/userModel";
 
-connect();
-
-export async function POST(NextRequest) {
+export async function POST(request) {
   try {
-    const reqBody = await NextRequest.json();
+    const { firstName, lastName, email, password, phone } = await request.json();
 
-    const { firstName, lastName, email, password, phone } = reqBody;
-
-    const name = firstName + " " + lastName;
-
-    //check if user already exist
-    const user = await User.findOne({ email });
-
-    if (user) {
-      return NextResponse.json({
-        message: "User Already Exists!",
-        status: 409,
-      });
+    if (!firstName || !lastName || !email || !password) {
+      return NextResponse.json(
+        { message: "Please complete all required fields" },
+        { status: 400 }
+      );
     }
 
-    // hash password
-    const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(password, salt);
+    await connect();
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = await User.findOne({ email: normalizedEmail });
 
-    const newUser = new User({
-      name,
-      email,
-      password: hashedPassword,
+    if (existingUser) {
+      return NextResponse.json(
+        { message: "An account with this email already exists" },
+        { status: 409 }
+      );
+    }
+
+    const user = await User.create({
+      name: `${firstName.trim()} ${lastName.trim()}`,
+      email: normalizedEmail,
+      password: await bcryptjs.hash(password, 10),
       phone,
     });
 
-    const savedUser = await newUser.save();
+    const response = NextResponse.json(
+      { message: "Account created", user: safeUser(user) },
+      { status: 201 }
+    );
+    response.cookies.set(
+      SESSION_COOKIE,
+      createSessionToken(user),
+      sessionCookieOptions()
+    );
 
-    return NextResponse.json({
-      message: "User created successfully",
-      success: true,
-      savedUser,
-      status: 200,
-    });
+    return response;
   } catch (error) {
-    console.log("hi");
+    console.error("Signup failed", error);
     return NextResponse.json(
-      { message: "Internal Error Bro!" },
+      { message: "Unable to create account" },
       { status: 500 }
     );
   }

@@ -1,37 +1,29 @@
+import { NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
-import { NextRequest, NextResponse } from "next/server";
+import { readSession } from "@/lib/auth";
 import Course from "@/models/courseModel";
+import User from "@/models/userModel";
 
-connect();
-
-export async function POST(NextRequest) {
+export async function POST(request) {
   try {
-    const reqBody = await NextRequest.json();
+    const session = readSession(request);
+    if (!session?.sub) {
+      return NextResponse.json({ message: "Please log in" }, { status: 401 });
+    }
 
-    const { category, name, duration, img1, img2, description, syllabus } =
-      reqBody;
+    await connect();
+    const admin = await User.findById(session.sub).select("isAdmin");
+    if (!admin?.isAdmin) {
+      return NextResponse.json({ message: "Admin access required" }, { status: 403 });
+    }
 
-    console.log(reqBody);
-
-    const newCourse = new Course({
-      category,
-      name,
-      duration,
-      img1,
-      img2,
-      description,
-      syllabus,
-    });
-
-    const savedCourse = await newCourse.save();
-
-    return NextResponse.json({
-      message: "Course created successfully",
-      success: true,
-      savedCourse,
-    });
+    const course = await Course.create(await request.json());
+    return NextResponse.json({ message: "Course created", course }, { status: 201 });
   } catch (error) {
-    console.error(error); // Log the error for debugging
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Course creation failed", error);
+    return NextResponse.json(
+      { message: "Unable to create course" },
+      { status: 500 }
+    );
   }
 }

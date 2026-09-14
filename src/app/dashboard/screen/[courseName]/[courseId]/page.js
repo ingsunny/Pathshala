@@ -19,6 +19,9 @@ import { useSelector } from "react-redux";
 import { quiz } from "./quiz";
 import Header from "@/components/Header";
 
+const COURSE_VIDEO_URL =
+  "https://s3.toosio.com/t/pathshala/videoplayback.mp4";
+
 const page = ({ params }) => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -64,7 +67,6 @@ const page = ({ params }) => {
       const response = await axios.post(`/api/course_progress/`, {
         courseId: params.courseId,
         topicId,
-        userId: currentUser._id,
       });
       dispatch(signInSuccess(response.data.user));
 
@@ -374,7 +376,7 @@ const page = ({ params }) => {
               onLoadedMetadata={handleLoadedMetadata}
               className="object-fit"
             >
-              <source autoPlay src={topic.topicLink} type="video/mp4" />
+              <source src={COURSE_VIDEO_URL} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>

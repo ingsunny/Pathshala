@@ -1,0 +1,18 @@
+services:
+  mongodb:
+    # Newer MongoDB 8 builds do not start on this laptop's Linux 6.19+ kernel.
+    image: mongo:8.0.4
+    container_name: pathshala-mongodb
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - pathshala_mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pathshala_mongodb_data:

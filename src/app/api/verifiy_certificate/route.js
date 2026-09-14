@@ -1,36 +1,35 @@
+import { NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import Certificate from "@/models/certificateModal";
-import { NextRequest, NextResponse } from "next/server";
 
-connect();
-
-export async function POST(NextRequest) {
+export async function POST(request) {
   try {
-    const reqBody = await NextRequest.json();
-
-    const { verificationId } = reqBody;
-
-    console.log(reqBody);
-
-    // Find user by ID
-    const certificate = await Certificate.findOne({
-      certificateId: verificationId.toUpperCase(),
-    });
-
-    if (certificate) {
-      return NextResponse.json({
-        message: "I got your certificate!",
-        certificate,
-        status: 200,
-      });
-    } else {
-      return NextResponse.json({
-        message: "Invalid CertificateId",
-        certificate,
-        status: 403,
-      });
+    const { verificationId } = await request.json();
+    if (!verificationId) {
+      return NextResponse.json(
+        { message: "Certificate ID is required" },
+        { status: 400 }
+      );
     }
-  } catch (err) {
-    return NextResponse.json({ message: "Internal Error" });
+
+    await connect();
+    const certificate = await Certificate.findOne({
+      certificateId: verificationId.trim().toUpperCase(),
+    }).lean();
+
+    if (!certificate) {
+      return NextResponse.json(
+        { message: "Certificate not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ certificate });
+  } catch (error) {
+    console.error("Certificate verification failed", error);
+    return NextResponse.json(
+      { message: "Unable to verify certificate" },
+      { status: 500 }
+    );
   }
 }

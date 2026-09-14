@@ -1,51 +1,44 @@
+import { NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
+import { readSession, safeUser } from "@/lib/auth";
 import Course from "@/models/courseModel";
 import User from "@/models/userModel";
-import { NextRequest, NextResponse } from "next/server";
 
-connect();
-
-export async function POST(NextRequest) {
+export async function POST(request) {
   try {
-    const reqBody = await NextRequest.json();
-
-    const { userId, courseId } = reqBody;
-
-    // Find user by ID
-    const user = await User.findById(userId);
-
-    // is that course already exist in the 'course'(array of object) in User model
-    const isCourseExistsAlready = user.courses.some(
-      (course) => course._id.toString() === courseId
-    );
-
-    if (isCourseExistsAlready) {
-      return new NextResponse("Already Enrolled!", {
-        status: 409, // Set your desired status code
-        headers: {
-          "Content-Type": "text/plain", // Set the content type (optional)
-        },
-      });
+    const session = readSession(request);
+    if (!session?.sub) {
+      return NextResponse.json({ message: "Please log in" }, { status: 401 });
     }
 
-    const course = await Course.findById(courseId);
+    const { courseId } = await request.json();
+    if (!courseId) {
+      return NextResponse.json({ message: "Course is required" }, { status: 400 });
+    }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $addToSet: { courses: course } },
-      { new: true }
-    );
+    await connect();
+    const [user, course] = await Promise.all([
+      User.findById(session.sub),
+      Course.findById(courseId),
+    ]);
+
+    if (!user || !course) {
+      return NextResponse.json({ message: "User or course not found" }, { status: 404 });
+    }
+
+    if (user.courses.some((item) => item._id.toString() === courseId)) {
+      return NextResponse.json({ message: "Already enrolled" }, { status: 409 });
+    }
+
+    user.courses.push(course.toObject());
+    await user.save();
 
     return NextResponse.json({
-      message: "Course Subscribed!",
-      user: updatedUser,
-      status: 200,
+      message: "Course enrolled",
+      user: safeUser(user),
     });
-  } catch (err) {
-    return NextResponse.json({ message: "Internal Error" });
+  } catch (error) {
+    console.error("Course enrollment failed", error);
+    return NextResponse.json({ message: "Unable to enroll" }, { status: 500 });
   }
 }
-
-// if (!course) {
-//   throw new Error("Course not found");
-// }

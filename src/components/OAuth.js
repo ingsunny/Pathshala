@@ -24,20 +24,16 @@ const OAuth = () => {
 
       const { email, displayName: username, photoURL } = result.user;
 
-      console.log(result);
-
       const response = await axios.post(`/api/signin_google/`, {
         name: username,
         email: email,
         photoUrl: photoURL,
       });
 
-      if (response.statusText == "OK") {
+      if (response.status === 200) {
         dispatch(signInSuccess(response.data.user));
-        toast.success("Login Successfull!");
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 2100);
+        toast.success("Login successful");
+        router.push("/dashboard");
       }
       // dispatch(signInSuccess(response.data));
     } catch (error) {

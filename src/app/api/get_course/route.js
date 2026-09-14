@@ -1,19 +1,17 @@
+import { NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
-import { NextRequest, NextResponse } from "next/server";
 import Course from "@/models/courseModel";
 
-connect();
-export async function GET(req, res) {
+export async function GET() {
   try {
-    const courses = await Course.find();
-
-    return NextResponse.json({
-      message: "Courses fetched successfully",
-      success: true,
-      courses,
-    });
+    await connect();
+    const courses = await Course.find().lean();
+    return NextResponse.json({ courses });
   } catch (error) {
-    console.error(error); // Log the error for debugging
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Course lookup failed", error);
+    return NextResponse.json(
+      { message: "Unable to load courses" },
+      { status: 500 }
+    );
   }
 }

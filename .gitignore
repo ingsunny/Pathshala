@@ -14,7 +14,7 @@
 /coverage
 
 # next.js
-# /.next/
+/.next/
 /out/
 
 # production
@@ -29,8 +29,14 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# env files (can opt-in for committing if needed)
-# .env*
+# env files
+.env*
+!.env.example
+
+# local database exports and backups
+/pathshala-db-json/
+/pathshala-mongodb-backup-*.archive*
+/videoplayback.mp4
 
 # vercel
 .vercel

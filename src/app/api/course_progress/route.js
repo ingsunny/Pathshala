@@ -2,6 +2,7 @@ import { connect } from "@/dbConfig/dbConfig";
 import Certificate from "@/models/certificateModal";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
+import { readSession, safeUser } from "@/lib/auth";
 
 import {
   getDownloadURL,
@@ -19,21 +20,33 @@ import { app } from "@/firebase";
 import { PDFDocument, rgb } from "pdf-lib";
 import fs from "fs";
 
-connect();
-
 export async function POST(NextRequest) {
   try {
+    const session = readSession(NextRequest);
+    if (!session?.sub) {
+      return NextResponse.json({ message: "Please log in" }, { status: 401 });
+    }
+
     const reqBody = await NextRequest.json();
 
-    const { userId, courseId, topicId } = reqBody;
+    const { courseId, topicId } = reqBody;
+    const userId = session.sub;
 
-    const user = await User.findOne({ _id: userId });
+    if (!courseId || !topicId) {
+      return NextResponse.json(
+        { message: "Course and topic are required" },
+        { status: 400 }
+      );
+    }
+
+    await connect();
+    const user = await User.findById(userId);
 
     if (!user) {
       return NextResponse.json({
         message: "User Not Found!",
         status: 404,
-      });
+      }, { status: 404 });
     }
 
     const course = user.courses.find(
@@ -44,7 +57,7 @@ export async function POST(NextRequest) {
       return NextResponse.json({
         message: "Course Not Found!",
         status: 404,
-      });
+      }, { status: 404 });
     }
 
     // Updating each topic progress here
@@ -79,9 +92,7 @@ export async function POST(NextRequest) {
 
     course.progress_status = percentageCompleted;
 
-    const savedUser = await user.save();
-
-    const { password, ...rest } = user._doc;
+    await user.save();
 
     // If user Completed 100% any of course we will generate the Certificate instantly
 
@@ -275,10 +286,14 @@ export async function POST(NextRequest) {
     return NextResponse.json({
       message: "Topic updated successfully!",
       status: 200,
-      user: rest,
+      user: safeUser(user),
     });
   } catch (err) {
-    return NextResponse.json({ message: "Internal Error" });
+    console.error("Course progress update failed", err);
+    return NextResponse.json(
+      { message: "Unable to update course progress" },
+      { status: 500 }
+    );
   }
 }
 

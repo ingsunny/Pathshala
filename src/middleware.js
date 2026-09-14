@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
 export function middleware(request) {
-  const token = request.cookies.get("token")?.value || "";
+  const token = request.cookies.get("pathshala_session")?.value || "";
 
   if (request.nextUrl.pathname.startsWith("/dashboard") && !token) {
     return NextResponse.redirect(new URL("/login", request.url));

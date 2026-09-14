@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import {
   Accordion,
@@ -28,15 +28,10 @@ const page = ({ params }) => {
   const { courses } = useSelector((state) => state.courses);
   const { currentUser, loading } = useSelector((state) => state.user);
 
-  const [course, setCourse] = useState(null); // Initialize state with null
-
-  useEffect(() => {
-    const [filteredCourse] = courses.filter(
-      (item) => item._id === params.courseId
-    );
-
-    setCourse(filteredCourse); // Set state to the filtered object
-  }, []);
+  const course = useMemo(
+    () => courses?.find((item) => item._id === params.courseId),
+    [courses, params.courseId]
+  );
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -64,27 +59,18 @@ const page = ({ params }) => {
     try {
       const signUpResponse = await axios.post(`/api/signup`, formData);
 
-      if (signUpResponse.data.status === 200) {
+      if (signUpResponse.status === 201) {
         toast.success("Signup Successful!");
 
         const enrollResponse = await axios.post(`/api/enroll_course`, {
-          userId: signUpResponse.data.savedUser._id,
           courseId: params.courseId,
         });
 
         if (enrollResponse.status === 200) {
+          dispatch(signInSuccess(enrollResponse.data.user));
           toast.success(`Successfully Enrolled to ${course.name} Course !`);
-          setTimeout(() => {
-            router.push("/dashboard");
-          }, 2500);
+          router.push("/dashboard");
         }
-      } else if (signUpResponse.data.status === 409) {
-        toast.error("User Already Exist!");
-        toast.error("Try Login First!");
-
-        setTimeout(() => {
-          router.push("/login");
-        }, 2500);
       }
 
       setFormData({
@@ -102,7 +88,10 @@ const page = ({ params }) => {
       setTimeout(() => {
         router.push("/");
       }, 2500);
-      console.log(error);
+      if (error.response?.status === 409) {
+        toast.error("An account already exists. Please log in.");
+        router.push("/login");
+      }
     }
     dispatch(loadingState(false));
   };
@@ -112,7 +101,6 @@ const page = ({ params }) => {
     dispatch(loadingState(true));
     try {
       const enrollResponse = await axios.post(`/api/enroll_course`, {
-        userId: currentUser._id,
         courseId: params.courseId,
       });
 
@@ -1005,4 +993,4 @@ const page = ({ params }) => {
   );
 };
 
-export default dynamic(() => Promise.resolve(page), { ssr: false });
+export default page;

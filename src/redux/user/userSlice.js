@@ -4,6 +4,7 @@ const initialState = {
   currentUser: null,
   openSidebar: null,
   loading: false,
+  sessionStatus: "loading",
 };
 
 const userSlice = createSlice({
@@ -16,12 +17,18 @@ const userSlice = createSlice({
     signInSuccess: (state, action) => {
       state.currentUser = action.payload;
       state.loading = false;
+      state.sessionStatus = "authenticated";
     },
     signInFailure: (state) => {
       state.loading = false;
     },
-    logOut: () => {
-      return initialState;
+    logOut: (state) => {
+      state.currentUser = null;
+      state.loading = false;
+      state.sessionStatus = "anonymous";
+    },
+    sessionResolved: (state) => {
+      state.sessionStatus = state.currentUser ? "authenticated" : "anonymous";
     },
     loadingState: (state, action) => {
       state.loading = action.payload;
@@ -39,6 +46,7 @@ export const {
   logOut,
   loadingState,
   openScreenSidebar,
+  sessionResolved,
 } = userSlice.actions;
 
 export default userSlice.reducer;
