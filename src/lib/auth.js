@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-export const SESSION_COOKIE = "pathshala_session";
+export const SESSION_COOKIE = "northstar_session";
 
 function getJwtSecret() {
   const secret = process.env.JWT_SECRET;
@@ -16,7 +16,7 @@ export function createSessionToken(user) {
   return jwt.sign(
     { sub: user._id.toString(), email: user.email },
     getJwtSecret(),
-    { expiresIn: "7d" }
+    { expiresIn: "7d" },
   );
 }
 

@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { signInSuccess } from "@/redux/user/userSlice";
 import toast from "react-hot-toast";
+import ExternalImage from "@/components/ExternalImage";
 
 const OAuth = () => {
   const router = useRouter();
@@ -34,24 +35,24 @@ const OAuth = () => {
       }
       // dispatch(signInSuccess(response.data));
     } catch (error) {
-      toast.error("Internal Error!");
-      console.error("Could not login with Google", error);
+      toast.error("Google sign-in could not be completed");
+      console.error("Could not sign in with Google", error);
     }
   };
 
   return (
-      <button
-        onClick={handleGoogleClick}
-        type="button"
-        className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-      >
-        <img
-          className="w-4 object-contain"
-          src="/google-signin.png"
-          alt=""
-        />
-        Continue with Google
-      </button>
+    <button
+      onClick={handleGoogleClick}
+      type="button"
+      className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#d8e2dc] bg-white px-4 py-3.5 text-sm font-bold text-[#415048] transition hover:border-[#b7c9be] hover:bg-[#f4f8f5]"
+    >
+      <ExternalImage
+        className="w-4 object-contain"
+        src="/google-signin.png"
+        alt=""
+      />
+      Continue with Google
+    </button>
   );
 };
 

@@ -16,8 +16,12 @@ function formatTime(value) {
   if (!Number.isFinite(value)) return "0:00";
   const hours = Math.floor(value / 3600);
   const minutes = Math.floor((value % 3600) / 60);
-  const seconds = Math.floor(value % 60).toString().padStart(2, "0");
-  return hours ? `${hours}:${minutes.toString().padStart(2, "0")}:${seconds}` : `${minutes}:${seconds}`;
+  const seconds = Math.floor(value % 60)
+    .toString()
+    .padStart(2, "0");
+  return hours
+    ? `${hours}:${minutes.toString().padStart(2, "0")}:${seconds}`
+    : `${minutes}:${seconds}`;
 }
 
 export default function CourseVideoPlayer({ src, title, poster, onEnded }) {
@@ -139,7 +143,7 @@ export default function CourseVideoPlayer({ src, title, poster, onEnded }) {
   return (
     <div
       ref={playerRef}
-      className="group relative aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-2xl shadow-slate-950/20 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+      className="group relative aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-2xl shadow-[#15231c]/20 focus:outline-none focus:ring-2 focus:ring-[#26815f] focus:ring-offset-2"
       tabIndex={0}
       onKeyDown={handleKeyboard}
       onMouseMove={revealControls}
@@ -157,7 +161,9 @@ export default function CourseVideoPlayer({ src, title, poster, onEnded }) {
           setDuration(event.currentTarget.duration);
           setWaiting(false);
         }}
-        onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+        onTimeUpdate={(event) =>
+          setCurrentTime(event.currentTarget.currentTime)
+        }
         onPlay={() => {
           setPlaying(true);
           setWaiting(false);
@@ -182,14 +188,16 @@ export default function CourseVideoPlayer({ src, title, poster, onEnded }) {
         <source src={src} type="video/mp4" />
       </video>
 
-      <div className={`pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent px-5 pb-10 pt-4 transition-opacity ${controlsVisible ? "opacity-100" : "opacity-0"}`}>
+      <div
+        className={`pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent px-5 pb-10 pt-4 transition-opacity ${controlsVisible ? "opacity-100" : "opacity-0"}`}
+      >
         <p className="truncate text-sm font-semibold text-white">{title}</p>
       </div>
 
       {!playing && !waiting && !error && (
         <button
           onClick={togglePlayback}
-          className="absolute left-1/2 top-1/2 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-slate-950 shadow-xl transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-400"
+          className="absolute left-1/2 top-1/2 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-[#15231c] shadow-xl transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#69a78b]"
           aria-label="Play video"
         >
           <PlayIcon className="ml-1 h-7 w-7" />
@@ -197,19 +205,26 @@ export default function CourseVideoPlayer({ src, title, poster, onEnded }) {
       )}
 
       {waiting && !error && (
-        <div className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-4 border-white/30 border-t-white" aria-label="Video loading" />
+        <div
+          className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-4 border-white/30 border-t-white"
+          aria-label="Video loading"
+        />
       )}
 
       {error && (
-        <div className="absolute inset-0 grid place-items-center bg-slate-950 px-6 text-center text-white">
+        <div className="absolute inset-0 grid place-items-center bg-[#15231c] px-6 text-center text-white">
           <div>
             <p className="font-semibold">This lesson could not be loaded</p>
-            <p className="mt-2 text-sm text-slate-400">Check your connection, then refresh the page.</p>
+            <p className="mt-2 text-sm text-[#95a099]">
+              Check your connection, then refresh the page.
+            </p>
           </div>
         </div>
       )}
 
-      <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 pb-3 pt-14 text-white transition-opacity sm:px-5 sm:pb-4 ${controlsVisible ? "opacity-100" : "pointer-events-none opacity-0"}`}>
+      <div
+        className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 pb-3 pt-14 text-white transition-opacity sm:px-5 sm:pb-4 ${controlsVisible ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      >
         <label className="block">
           <span className="sr-only">Video progress</span>
           <input
@@ -219,24 +234,43 @@ export default function CourseVideoPlayer({ src, title, poster, onEnded }) {
             step="0.1"
             value={currentTime}
             onChange={(event) => seekTo(event.target.value)}
-            className="h-1.5 w-full cursor-pointer accent-sky-500"
+            className="h-1.5 w-full cursor-pointer accent-[#26815f]"
             aria-label="Seek video"
             style={{ backgroundSize: `${progress}% 100%` }}
           />
         </label>
 
         <div className="mt-2 flex items-center gap-1 sm:gap-2">
-          <ControlButton label={playing ? "Pause" : "Play"} onClick={togglePlayback}>
-            {playing ? <PauseIcon className="h-5 w-5" /> : <PlayIcon className="h-5 w-5" />}
+          <ControlButton
+            label={playing ? "Pause" : "Play"}
+            onClick={togglePlayback}
+          >
+            {playing ? (
+              <PauseIcon className="h-5 w-5" />
+            ) : (
+              <PlayIcon className="h-5 w-5" />
+            )}
           </ControlButton>
-          <ControlButton label="Back 10 seconds" onClick={() => skip(-10)} className="hidden sm:grid">
+          <ControlButton
+            label="Back 10 seconds"
+            onClick={() => skip(-10)}
+            className="hidden sm:grid"
+          >
             <BackwardIcon className="h-5 w-5" />
           </ControlButton>
-          <ControlButton label="Forward 10 seconds" onClick={() => skip(10)} className="hidden sm:grid">
+          <ControlButton
+            label="Forward 10 seconds"
+            onClick={() => skip(10)}
+            className="hidden sm:grid"
+          >
             <ForwardIcon className="h-5 w-5" />
           </ControlButton>
           <ControlButton label={muted ? "Unmute" : "Mute"} onClick={toggleMute}>
-            {muted || volume === 0 ? <SpeakerXMarkIcon className="h-5 w-5" /> : <SpeakerWaveIcon className="h-5 w-5" />}
+            {muted || volume === 0 ? (
+              <SpeakerXMarkIcon className="h-5 w-5" />
+            ) : (
+              <SpeakerWaveIcon className="h-5 w-5" />
+            )}
           </ControlButton>
           <label className="hidden items-center sm:flex">
             <span className="sr-only">Volume</span>
@@ -247,7 +281,7 @@ export default function CourseVideoPlayer({ src, title, poster, onEnded }) {
               step="0.05"
               value={muted ? 0 : volume}
               onChange={(event) => changeVolume(event.target.value)}
-              className="w-20 cursor-pointer accent-sky-500"
+              className="w-20 cursor-pointer accent-[#26815f]"
             />
           </label>
           <span className="ml-1 text-xs font-medium tabular-nums text-white/90">
@@ -264,11 +298,17 @@ export default function CourseVideoPlayer({ src, title, poster, onEnded }) {
                 aria-label="Playback speed"
               >
                 {[0.5, 0.75, 1, 1.25, 1.5, 2].map((value) => (
-                  <option key={value} value={value} className="text-slate-900">{value}x</option>
+                  <option key={value} value={value} className="text-[#15231c]">
+                    {value}x
+                  </option>
                 ))}
               </select>
             </label>
-            <ControlButton label="Picture in picture" onClick={togglePictureInPicture} className="hidden sm:grid">
+            <ControlButton
+              label="Picture in picture"
+              onClick={togglePictureInPicture}
+              className="hidden sm:grid"
+            >
               <RectangleGroupIcon className="h-5 w-5" />
             </ControlButton>
             <ControlButton label="Toggle fullscreen" onClick={toggleFullscreen}>
@@ -286,7 +326,7 @@ function ControlButton({ label, onClick, children, className = "" }) {
     <button
       type="button"
       onClick={onClick}
-      className={`grid h-9 w-9 place-items-center rounded-lg text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-sky-400 ${className}`}
+      className={`grid h-9 w-9 place-items-center rounded-lg text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-[#69a78b] ${className}`}
       aria-label={label}
       title={label}
     >

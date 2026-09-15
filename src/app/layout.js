@@ -1,19 +1,23 @@
-import { Inter } from "next/font/google";
+import { Manrope, Newsreader } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/redux/provider";
 
-const inter = Inter({ subsets: ["latin"] });
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-newsreader",
+});
 
 export const metadata = {
-  title: "Pathshala | Learn practical skills online",
+  title: "Northstar | Build skills that change what comes next",
   description:
-    "Build job-ready skills with practical, self-paced courses from Pathshala.",
+    "Focused courses, clear explanations, meaningful assessments, and verified proof of progress.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body className={inter.className}>
+      <body className={`${manrope.variable} ${newsreader.variable} font-sans`}>
         <ReduxProvider>{children}</ReduxProvider>
       </body>
     </html>

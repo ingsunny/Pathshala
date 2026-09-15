@@ -1,6 +1,6 @@
-# Pathshala
+# Northstar
 
-Pathshala is a full-stack learning platform built with Next.js, MongoDB, Redux Toolkit, and Tailwind CSS. It includes enrollment, lesson progress, written lesson summaries, a custom video player, timed final assessments, server-side grading, and locally generated PDF certificates.
+Northstar is a full-stack learning platform built with Next.js, MongoDB, Redux Toolkit, and Tailwind CSS. It includes enrollment, lesson progress, written lesson summaries, a custom video player, timed final assessments, server-side grading, and locally generated PDF certificates.
 
 ## Local setup
 
