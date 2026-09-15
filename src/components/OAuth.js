@@ -8,7 +8,7 @@ import { signInSuccess } from "@/redux/user/userSlice";
 import toast from "react-hot-toast";
 import ExternalImage from "@/components/ExternalImage";
 
-const OAuth = () => {
+const OAuth = ({ onSuccess, redirectTo = "/dashboard" }) => {
   const router = useRouter();
 
   const dispatch = useDispatch();
@@ -31,7 +31,8 @@ const OAuth = () => {
       if (response.status === 200) {
         dispatch(signInSuccess(response.data.user));
         toast.success("Login successful");
-        router.push("/dashboard");
+        if (onSuccess) await onSuccess(response.data.user);
+        else if (redirectTo) router.push(redirectTo);
       }
       // dispatch(signInSuccess(response.data));
     } catch (error) {

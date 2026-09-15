@@ -14,16 +14,22 @@ export async function POST(request) {
     await connect();
     const admin = await User.findById(session.sub).select("isAdmin");
     if (!admin?.isAdmin) {
-      return NextResponse.json({ message: "Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { message: "Admin access required" },
+        { status: 403 },
+      );
     }
 
     const course = await Course.create(await request.json());
-    return NextResponse.json({ message: "Course created", course }, { status: 201 });
+    return NextResponse.json(
+      { message: "Course created", course },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Course creation failed", error);
     return NextResponse.json(
       { message: "Unable to create course" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

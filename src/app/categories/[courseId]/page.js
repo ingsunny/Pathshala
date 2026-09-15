@@ -41,6 +41,7 @@ export default function CourseDetailsPage({ params }) {
     email: "",
     password: "",
   });
+  const [authMode, setAuthMode] = useState("signup");
 
   const totalLessons =
     course?.syllabus?.reduce(
@@ -71,10 +72,16 @@ export default function CourseDetailsPage({ params }) {
     event.preventDefault();
     dispatch(loadingState(true));
     try {
-      await axios.post("/api/signup", formData);
+      const authResponse = await axios.post(
+        authMode === "signup" ? "/api/signup" : "/api/login",
+        authMode === "signup"
+          ? formData
+          : { email: formData.email, password: formData.password },
+      );
+      dispatch(signInSuccess(authResponse.data.user));
       const response = await axios.post("/api/enroll_course", { courseId });
       dispatch(signInSuccess(response.data.user));
-      toast.success("Your Northstar journey is ready");
+      toast.success("Course added to your learning path");
       router.push("/dashboard");
     } catch (error) {
       toast.error(
@@ -138,7 +145,7 @@ export default function CourseDetailsPage({ params }) {
               <div className="relative flex aspect-video items-end overflow-hidden rounded-2xl bg-[#153e2f] p-5 text-white">
                 <ExternalImage
                   src={course.img1 || "/android.png.webp"}
-                  alt=""
+                  alt={`${course.name} course`}
                   className="absolute inset-0 h-full w-full object-cover opacity-45"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#102d22] to-transparent" />
@@ -291,7 +298,7 @@ export default function CourseDetailsPage({ params }) {
                   Begin your path
                 </p>
                 <h2 className="mt-4 max-w-xl font-editorial text-4xl font-semibold tracking-[-.04em] sm:text-5xl">
-                  Create your free learning account.
+                  Sign in or create an account, then start immediately.
                 </h2>
                 <p className="mt-5 max-w-lg text-base leading-7 text-[#c4d5cc]">
                   Your course, progress, assessment attempts, and certificate
@@ -299,7 +306,18 @@ export default function CourseDetailsPage({ params }) {
                 </p>
               </div>
               <div className="rounded-[22px] bg-white p-6 text-[#15231c]">
-                <OAuth />
+                <div className="mb-5 grid grid-cols-2 rounded-xl bg-[#edf2ee] p-1">
+                  {["signup", "login"].map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => setAuthMode(mode)}
+                      className={`rounded-lg px-3 py-2.5 text-sm font-extrabold ${authMode === mode ? "bg-white text-[#15231c] shadow-sm" : "text-[#637069]"}`}
+                    >
+                      {mode === "signup" ? "Create account" : "Sign in"}
+                    </button>
+                  ))}
+                </div>
+                <OAuth onSuccess={enroll} redirectTo={null} />
                 <div className="my-5 flex items-center gap-3">
                   <i className="h-px flex-1 bg-[#e4eae6]" />
                   <span className="text-xs font-bold text-[#8a958f]">
@@ -308,34 +326,36 @@ export default function CourseDetailsPage({ params }) {
                   <i className="h-px flex-1 bg-[#e4eae6]" />
                 </div>
                 <form onSubmit={createAndEnroll} className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      required
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={(event) =>
-                        setFormData({
-                          ...formData,
-                          [event.target.name]: event.target.value,
-                        })
-                      }
-                      placeholder="First name"
-                      className="northstar-input"
-                    />
-                    <input
-                      required
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={(event) =>
-                        setFormData({
-                          ...formData,
-                          [event.target.name]: event.target.value,
-                        })
-                      }
-                      placeholder="Last name"
-                      className="northstar-input"
-                    />
-                  </div>
+                  {authMode === "signup" && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        required
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={(event) =>
+                          setFormData({
+                            ...formData,
+                            [event.target.name]: event.target.value,
+                          })
+                        }
+                        placeholder="First name"
+                        className="northstar-input"
+                      />
+                      <input
+                        required
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={(event) =>
+                          setFormData({
+                            ...formData,
+                            [event.target.name]: event.target.value,
+                          })
+                        }
+                        placeholder="Last name"
+                        className="northstar-input"
+                      />
+                    </div>
+                  )}
                   <input
                     required
                     type="email"
@@ -362,7 +382,11 @@ export default function CourseDetailsPage({ params }) {
                         [event.target.name]: event.target.value,
                       })
                     }
-                    placeholder="Password (8+ characters)"
+                    placeholder={
+                      authMode === "signup"
+                        ? "Upper, lower, number & symbol"
+                        : "Your password"
+                    }
                     className="northstar-input"
                   />
                   <button
@@ -370,15 +394,14 @@ export default function CourseDetailsPage({ params }) {
                     className="northstar-button-primary w-full disabled:opacity-60"
                   >
                     {loading
-                      ? "Creating your account…"
-                      : "Create account & enroll"}
+                      ? "Working…"
+                      : authMode === "signup"
+                        ? "Create account & enroll"
+                        : "Sign in & enroll"}
                   </button>
                 </form>
                 <p className="mt-4 text-center text-xs text-[#7b8881]">
-                  Already have an account?{" "}
-                  <Link href="/login" className="font-bold text-[#176b4d]">
-                    Sign in
-                  </Link>
+                  You will be enrolled in {course.name} automatically.
                 </p>
               </div>
             </div>

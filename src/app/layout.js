@@ -1,6 +1,8 @@
 import { Manrope, Newsreader } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/redux/provider";
+import AccessibilityControls from "@/components/AccessibilityControls";
+import TutorChat from "@/components/TutorChat";
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
 const newsreader = Newsreader({
@@ -18,7 +20,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body className={`${manrope.variable} ${newsreader.variable} font-sans`}>
-        <ReduxProvider>{children}</ReduxProvider>
+        <ReduxProvider>
+          {children}
+          <AccessibilityControls />
+          <TutorChat />
+        </ReduxProvider>
       </body>
     </html>
   );

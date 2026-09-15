@@ -13,8 +13,17 @@ const assessmentResultSchema = new mongoose.Schema(
     startedAt: Date,
     expiresAt: Date,
     submittedAt: Date,
+    integrityEvents: [
+      {
+        type: {
+          type: String,
+          enum: ["back_attempt", "tab_hidden", "fullscreen_exit"],
+        },
+        occurredAt: { type: Date, default: Date.now },
+      },
+    ],
   },
-  { _id: false }
+  { _id: false },
 );
 
 const enrollmentSchema = new mongoose.Schema(
@@ -29,7 +38,7 @@ const enrollmentSchema = new mongoose.Schema(
     assessmentResult: { type: assessmentResultSchema, default: () => ({}) },
     enrolledAt: { type: Date, default: Date.now },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const userSchema = new mongoose.Schema({
@@ -45,6 +54,8 @@ const userSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: false },
   isAdmin: { type: Boolean, default: false },
   enrollments: { type: [enrollmentSchema], default: [] },
+  activityDays: { type: [Date], default: [] },
+  lastActiveAt: Date,
 });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);

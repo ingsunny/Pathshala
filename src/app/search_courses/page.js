@@ -102,7 +102,7 @@ export default function CourseSearchPage() {
                     <div className="relative h-48 overflow-hidden bg-[#153e2f]">
                       <ExternalImage
                         src={course.img1 || "/android.png.webp"}
-                        alt=""
+                        alt={`${course.name} course`}
                         className="h-full w-full object-cover opacity-70 transition duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#102d22]/80 to-transparent" />

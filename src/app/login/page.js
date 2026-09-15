@@ -15,6 +15,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import BrandLogo from "@/components/BrandLogo";
 import OAuth from "@/components/OAuth";
+import ExternalImage from "@/components/ExternalImage";
 import {
   signInFailure,
   signInStart,
@@ -46,8 +47,16 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen bg-[#fbfcf8] lg:grid lg:grid-cols-[1.05fr_.95fr]">
       <section className="relative hidden overflow-hidden bg-[#153e2f] p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
+        <ExternalImage
+          src="/images/northstar-learning-hero.png"
+          alt="Professionals learning together"
+          className="absolute inset-0 h-full w-full object-cover opacity-35"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0d2d21] via-[#153e2f]/85 to-[#153e2f]/55" />
         <div className="absolute -right-28 -top-32 h-96 w-96 rounded-full border-[70px] border-white/5" />
-        <BrandLogo inverse />
+        <div className="relative">
+          <BrandLogo inverse />
+        </div>
         <div className="relative max-w-xl">
           <p className="text-xs font-extrabold uppercase tracking-[.17em] text-[#a9d3bc]">
             Your learning space

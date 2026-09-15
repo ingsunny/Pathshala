@@ -29,7 +29,7 @@ function CourseCard({ course }) {
       <div className="relative h-48 overflow-hidden bg-[#173e2f]">
         <ExternalImage
           src={course.img1 || "/android.png.webp"}
-          alt=""
+          alt={`${course.name} course`}
           className="h-full w-full object-cover opacity-75 transition duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#10281f]/80 via-transparent to-transparent" />
@@ -114,6 +114,12 @@ export default function HomePage() {
                 </span>
               </div>
               <div className="relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-[19px] bg-gradient-to-br from-[#176b4d] to-[#102d22] p-7 text-white">
+                <ExternalImage
+                  src="/images/northstar-learning-hero.png"
+                  alt="Professionals learning together around a laptop"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#10281f] via-[#10281f]/35 to-transparent" />
                 <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border-[50px] border-white/10" />
                 <span className="relative text-xs font-bold uppercase tracking-[.16em] text-[#a9d8c0]">
                   Continue learning

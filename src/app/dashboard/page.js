@@ -8,6 +8,8 @@ import {
   CheckBadgeIcon,
   ChevronRightIcon,
   ClockIcon,
+  ChartBarIcon,
+  FireIcon,
   HomeIcon,
   MagnifyingGlassIcon,
   PlayIcon,
@@ -29,6 +31,7 @@ const navigation = [
   { id: "overview", label: "Overview", icon: HomeIcon },
   { id: "courses", label: "My courses", icon: BookOpenIcon },
   { id: "certificates", label: "Certificates", icon: TrophyIcon },
+  { id: "analytics", label: "Analytics", icon: ChartBarIcon },
 ];
 
 function getCourseProgress(course) {
@@ -88,7 +91,7 @@ function CourseCard({ course, featured = false }) {
       >
         <ExternalImage
           src={course.img1 || "/android.png.webp"}
-          alt=""
+          alt={`${course.name} course`}
           className="h-full w-full object-cover opacity-75 transition duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#15231c]/80 via-[#15231c]/10 to-transparent" />
@@ -191,6 +194,25 @@ export default function DashboardPage() {
     0,
   );
   const totalLessons = courseStats.reduce((sum, item) => sum + item.total, 0);
+  const averageProgress = courseStats.length
+    ? Math.round(
+        courseStats.reduce((sum, item) => sum + item.percent, 0) /
+          courseStats.length,
+      )
+    : 0;
+  const completedMinutes = enrolledCourses.reduce(
+    (sum, course) =>
+      sum +
+      course.syllabus
+        .flatMap((chapter) => chapter.topics)
+        .filter((topic) => topic.topicProgress)
+        .reduce((minutes, topic) => minutes + (topic.durationMinutes || 12), 0),
+    0,
+  );
+  const assessmentAttempts = enrolledCourses.reduce(
+    (sum, course) => sum + (course.assessmentResult?.attempts || 0),
+    0,
+  );
   const activeCourse =
     courseStats.find(
       (item) => item.course.assessmentResult?.status !== "passed",
@@ -322,7 +344,7 @@ export default function DashboardPage() {
               </div>
               <ExternalImage
                 src={currentUser.photoUrl || "/default-user.png"}
-                alt=""
+                alt={`${currentUser.name} profile`}
                 className="h-10 w-10 rounded-xl border border-[#dfe6e1] object-cover"
               />
             </div>
@@ -482,6 +504,101 @@ export default function DashboardPage() {
           )}
 
           {section === "certificates" && <Certificates />}
+          {section === "analytics" && (
+            <section>
+              <p className="text-sm font-semibold text-[#176b4d]">
+                Learning intelligence
+              </p>
+              <h1 className="mt-1 font-editorial text-4xl font-semibold tracking-[-.04em] text-[#15231c]">
+                Your progress, clearly measured.
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#637069]">
+                Use these signals to protect your momentum and decide where your
+                next focused session matters most.
+              </p>
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {[
+                  [
+                    FireIcon,
+                    `${currentUser.learningStats?.streak || 0} days`,
+                    "Current streak",
+                  ],
+                  [
+                    ClockIcon,
+                    `${Math.round(completedMinutes / 60)}h ${completedMinutes % 60}m`,
+                    "Focused learning",
+                  ],
+                  [ChartBarIcon, `${averageProgress}%`, "Average progress"],
+                  [CheckBadgeIcon, assessmentAttempts, "Assessment attempts"],
+                ].map(([Icon, value, label]) => (
+                  <article
+                    key={label}
+                    className="rounded-2xl border border-[#dfe6e1] bg-white p-5 shadow-sm"
+                  >
+                    <Icon className="h-6 w-6 text-[#176b4d]" />
+                    <strong className="mt-5 block text-2xl text-[#15231c]">
+                      {value}
+                    </strong>
+                    <span className="mt-1 block text-sm text-[#748179]">
+                      {label}
+                    </span>
+                  </article>
+                ))}
+              </div>
+              <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+                <article className="rounded-3xl border border-[#dfe6e1] bg-white p-6 shadow-sm sm:p-8">
+                  <h2 className="text-lg font-extrabold text-[#15231c]">
+                    Course momentum
+                  </h2>
+                  <div className="mt-7 space-y-6">
+                    {courseStats.length ? (
+                      courseStats.map(
+                        ({ course, completed, total, percent }) => (
+                          <div key={course._id}>
+                            <div className="flex justify-between gap-4 text-sm">
+                              <span className="font-bold text-[#26362e]">
+                                {course.name}
+                              </span>
+                              <span className="text-[#637069]">
+                                {completed}/{total} lessons
+                              </span>
+                            </div>
+                            <div className="mt-2 h-3 overflow-hidden rounded-full bg-[#edf2ee]">
+                              <div
+                                className="h-full rounded-full bg-gradient-to-r from-[#176b4d] to-[#52a37e]"
+                                style={{ width: `${percent}%` }}
+                              />
+                            </div>
+                          </div>
+                        ),
+                      )
+                    ) : (
+                      <p className="text-sm text-[#637069]">
+                        Enroll in your first course to begin measuring progress.
+                      </p>
+                    )}
+                  </div>
+                </article>
+                <article className="rounded-3xl bg-[#153e2f] p-7 text-white shadow-sm">
+                  <FireIcon className="h-8 w-8 text-[#8bc2a5]" />
+                  <h2 className="mt-5 font-editorial text-3xl font-semibold">
+                    Consistency wins.
+                  </h2>
+                  <p className="mt-3 text-sm leading-6 text-[#c4d5cc]">
+                    You have studied on{" "}
+                    {currentUser.learningStats?.activeDays || 0} distinct days.
+                    Finish one lesson today to keep your learning record moving.
+                  </p>
+                  <button
+                    onClick={() => setSection("courses")}
+                    className="mt-7 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-[#153e2f]"
+                  >
+                    Continue learning
+                  </button>
+                </article>
+              </div>
+            </section>
+          )}
         </div>
       </main>
     </div>

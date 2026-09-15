@@ -24,7 +24,7 @@ export async function GET() {
     console.error("Course lookup failed", error);
     return NextResponse.json(
       { message: "Unable to load courses" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

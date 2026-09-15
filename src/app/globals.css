@@ -19,6 +19,8 @@
     font-family: var(--font-manrope), system-ui, sans-serif;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    font-size: 16px;
+    line-height: 1.6;
   }
 
   button,
@@ -45,6 +47,111 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+  }
+}
+
+html[data-contrast="true"] {
+  font-size: 17px;
+}
+
+html[data-contrast="true"] body {
+  font-weight: 520;
+  letter-spacing: 0.005em;
+}
+
+html[data-contrast="true"] [class*="text-[#637069]"],
+html[data-contrast="true"] [class*="text-[#748179]"],
+html[data-contrast="true"] [class*="text-[#69766f]"],
+html[data-contrast="true"] [class*="text-[#59675f]"],
+html[data-contrast="true"] [class*="text-[#5f6e66]"],
+html[data-contrast="true"] [class*="text-[#6d7a73]"],
+html[data-contrast="true"] [class*="text-[#6f7c75]"],
+html[data-contrast="true"] [class*="text-[#6f7d75]"],
+html[data-contrast="true"] [class*="text-[#708078]"],
+html[data-contrast="true"] [class*="text-[#7b8881]"],
+html[data-contrast="true"] [class*="text-[#8a958f]"],
+html[data-contrast="true"] [class*="text-[#95a099]"] {
+  color: #34453c !important;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] [class*="bg-[#fbfcf8]"],
+html[data-theme="dark"] [class*="bg-[#f6f8f5]"],
+html[data-theme="dark"] [class*="bg-[#f5f8f6]"],
+html[data-theme="dark"] [class*="bg-[#f4f6fa]"] {
+  background-color: #101713 !important;
+  color: #f4f8f5;
+}
+
+html[data-theme="dark"] [class*="bg-white"] {
+  background-color: #18221d !important;
+}
+
+html[data-theme="dark"] [class*="bg-[#eef5f0]"],
+html[data-theme="dark"] [class*="bg-[#f0f5f1]"],
+html[data-theme="dark"] [class*="bg-[#f2f6f3]"],
+html[data-theme="dark"] [class*="bg-[#edf2ee]"] {
+  background-color: #1d2a23 !important;
+}
+
+html[data-theme="dark"] [class*="text-[#15231c]"],
+html[data-theme="dark"] [class*="text-[#26362e]"],
+html[data-theme="dark"] [class*="text-[#415048]"] {
+  color: #f4f8f5 !important;
+}
+
+html[data-theme="dark"] [class*="text-[#637069]"],
+html[data-theme="dark"] [class*="text-[#748179]"],
+html[data-theme="dark"] [class*="text-[#69766f]"],
+html[data-theme="dark"] [class*="text-[#59675f]"],
+html[data-theme="dark"] [class*="text-[#5f6e66]"],
+html[data-theme="dark"] [class*="text-[#6d7a73]"],
+html[data-theme="dark"] [class*="text-[#6f7c75]"],
+html[data-theme="dark"] [class*="text-[#6f7d75]"],
+html[data-theme="dark"] [class*="text-[#708078]"],
+html[data-theme="dark"] [class*="text-[#7b8881]"],
+html[data-theme="dark"] [class*="text-[#8a958f]"],
+html[data-theme="dark"] [class*="text-[#95a099]"] {
+  color: #c3d1c9 !important;
+}
+
+html[data-theme="dark"] [class*="border-[#dfe6e1]"],
+html[data-theme="dark"] [class*="border-[#edf2ee]"],
+html[data-theme="dark"] [class*="border-[#e2e9e4]"] {
+  border-color: #35453c !important;
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea {
+  background: #111a15 !important;
+  color: #f4f8f5 !important;
+}
+
+body.assessment-active {
+  overflow: hidden;
+}
+
+body.assessment-active .northstar-floating-tools {
+  display: none;
+}
+
+.northstar-confetti {
+  position: absolute;
+  top: -1rem;
+  width: 0.55rem;
+  height: 1rem;
+  border-radius: 0.2rem;
+  animation: northstar-confetti-fall 2.4s ease-out both;
+}
+
+@keyframes northstar-confetti-fall {
+  to {
+    transform: translate3d(20px, 620px, 0) rotate(540deg);
+    opacity: 0;
   }
 }
 

@@ -12,6 +12,18 @@ test("landing page presents the learning catalog", async ({ page }) => {
     page.getByRole("heading", { name: /Learning, without the noise/i }),
   ).toBeVisible();
   await expect(page.locator("#courses")).toBeVisible();
+  const hero = page.getByAltText(
+    "Professionals learning together around a laptop",
+  );
+  await expect(hero).toBeVisible();
+  await expect
+    .poll(() => hero.evaluate((image) => image.naturalWidth))
+    .toBeGreaterThan(0);
+
+  await page.getByRole("button", { name: "Use dark theme" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.getByRole("button", { name: "Toggle high readability" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-contrast", "true");
 });
 
 test("course search filters the live catalog", async ({ page }) => {

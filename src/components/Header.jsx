@@ -72,7 +72,7 @@ export default function Header() {
               >
                 <ExternalImage
                   src={currentUser.photoUrl || "/default-user.png"}
-                  alt=""
+                  alt={`${currentUser.name} profile`}
                   className="h-7 w-7 rounded-lg object-cover"
                 />
                 <span className="max-w-28 truncate">

@@ -14,7 +14,10 @@ export async function POST(request) {
     const { idToken } = await request.json();
 
     if (!idToken || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-      return NextResponse.json({ message: "Invalid Google sign-in" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid Google sign-in" },
+        { status: 400 },
+      );
     }
 
     const verification = await fetch(
@@ -24,13 +27,16 @@ export async function POST(request) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
         cache: "no-store",
-      }
+      },
     );
     const verifiedAccount = await verification.json();
     const googleUser = verifiedAccount.users?.[0];
 
     if (!verification.ok || !googleUser?.email || !googleUser.emailVerified) {
-      return NextResponse.json({ message: "Google identity could not be verified" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Google identity could not be verified" },
+        { status: 401 },
+      );
     }
 
     await connect();
@@ -44,6 +50,11 @@ export async function POST(request) {
         password: await bcryptjs.hash(crypto.randomUUID(), 10),
         photoUrl: googleUser.photoUrl,
       });
+    } else {
+      user.name = googleUser.displayName || user.name;
+      user.photoUrl = googleUser.photoUrl || user.photoUrl;
+      user.isVerified = true;
+      await user.save();
     }
 
     const response = NextResponse.json({
@@ -53,7 +64,7 @@ export async function POST(request) {
     response.cookies.set(
       SESSION_COOKIE,
       createSessionToken(user),
-      sessionCookieOptions()
+      sessionCookieOptions(),
     );
 
     return response;

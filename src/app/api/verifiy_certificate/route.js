@@ -8,7 +8,7 @@ export async function POST(request) {
     if (!verificationId) {
       return NextResponse.json(
         { message: "Certificate ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -20,7 +20,7 @@ export async function POST(request) {
     if (!certificate) {
       return NextResponse.json(
         { message: "Certificate not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST(request) {
     console.error("Certificate verification failed", error);
     return NextResponse.json(
       { message: "Unable to verify certificate" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -6,6 +6,7 @@ import {
   CheckCircleIcon,
   ClockIcon,
   LockClosedIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -17,6 +18,27 @@ function formatRemaining(seconds) {
   return `${Math.floor(safe / 60)
     .toString()
     .padStart(2, "0")}:${(safe % 60).toString().padStart(2, "0")}`;
+}
+
+function Celebration() {
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 overflow-hidden"
+      aria-hidden="true"
+    >
+      {Array.from({ length: 18 }, (_, index) => (
+        <i
+          key={index}
+          className="northstar-confetti"
+          style={{
+            left: `${(index * 37) % 100}%`,
+            animationDelay: `${(index % 6) * 120}ms`,
+            background: ["#176b4d", "#e3a72f", "#53a681", "#164a36"][index % 4],
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 export default function FinalAssessment({
@@ -45,6 +67,8 @@ export default function FinalAssessment({
   );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [exitWarning, setExitWarning] = useState(false);
 
   const answeredCount = Object.keys(answers).length;
   const progress = questions.length
@@ -74,6 +98,8 @@ export default function FinalAssessment({
       if (response.data.user) dispatch(signInSuccess(response.data.user));
       setOutcome(response.data);
       setStage("result");
+      if (document.fullscreenElement)
+        await document.exitFullscreen().catch(() => {});
     } catch (requestError) {
       const data = requestError.response?.data;
       if (requestError.response?.status === 408) {
@@ -108,9 +134,55 @@ export default function FinalAssessment({
     return () => clearInterval(timer);
   }, [expiresAt, stage, submitAssessment]);
 
+  useEffect(() => {
+    if (stage !== "taking") return;
+    document.body.classList.add("assessment-active");
+    history.pushState({ northstarAssessment: true }, "");
+
+    const logIntegrity = (eventType) => {
+      const body = new Blob(
+        [JSON.stringify({ action: "integrity_event", courseId, eventType })],
+        { type: "application/json" },
+      );
+      navigator.sendBeacon("/api/assessment", body);
+    };
+    const onBeforeUnload = (event) => {
+      logIntegrity("back_attempt");
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    const onPopState = () => {
+      history.pushState({ northstarAssessment: true }, "");
+      logIntegrity("back_attempt");
+      setExitWarning(true);
+    };
+    const onVisibility = () => {
+      if (document.hidden) logIntegrity("tab_hidden");
+    };
+    const onFullscreen = () => {
+      if (!document.fullscreenElement) {
+        logIntegrity("fullscreen_exit");
+        setExitWarning(true);
+      }
+    };
+
+    addEventListener("beforeunload", onBeforeUnload);
+    addEventListener("popstate", onPopState);
+    document.addEventListener("visibilitychange", onVisibility);
+    document.addEventListener("fullscreenchange", onFullscreen);
+    return () => {
+      document.body.classList.remove("assessment-active");
+      removeEventListener("beforeunload", onBeforeUnload);
+      removeEventListener("popstate", onPopState);
+      document.removeEventListener("visibilitychange", onVisibility);
+      document.removeEventListener("fullscreenchange", onFullscreen);
+    };
+  }, [courseId, stage]);
+
   async function startAssessment() {
     setLoading(true);
     setError("");
+    await document.documentElement.requestFullscreen?.().catch(() => {});
     try {
       const response = await axios.post("/api/assessment", {
         action: "start",
@@ -124,7 +196,11 @@ export default function FinalAssessment({
       setQuestions(response.data.questions);
       setExpiresAt(response.data.expiresAt);
       setStage("taking");
+      setConfirmOpen(false);
     } catch (requestError) {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen().catch(() => {});
+      }
       setError(
         requestError.response?.data?.message ||
           "The assessment could not be started.",
@@ -190,7 +266,7 @@ export default function FinalAssessment({
               incorrect, and you may retry if needed.
             </p>
             <button
-              onClick={startAssessment}
+              onClick={() => setConfirmOpen(true)}
               disabled={loading}
               className="shrink-0 rounded-xl bg-[#176b4d] px-6 py-3 text-sm font-bold text-white hover:bg-[#145e43] disabled:opacity-60"
             >
@@ -205,6 +281,44 @@ export default function FinalAssessment({
             <p className="sm:col-span-3 text-sm text-rose-600">{error}</p>
           )}
         </div>
+        {confirmOpen && (
+          <div
+            className="fixed inset-0 z-[100] grid place-items-center bg-[#09130e]/70 p-5 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="assessment-confirm-title"
+          >
+            <div className="w-full max-w-lg rounded-3xl bg-white p-7 shadow-2xl sm:p-9">
+              <ExclamationTriangleIcon className="h-10 w-10 text-amber-600" />
+              <h2
+                id="assessment-confirm-title"
+                className="mt-5 text-2xl font-extrabold text-[#15231c]"
+              >
+                Enter focused assessment mode?
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-[#637069]">
+                The test opens full screen for 45 minutes. Back navigation,
+                leaving full screen, and switching tabs trigger a warning and
+                are recorded in your assessment activity.
+              </p>
+              <div className="mt-7 flex justify-end gap-3">
+                <button
+                  onClick={() => setConfirmOpen(false)}
+                  className="northstar-button-secondary"
+                >
+                  Not yet
+                </button>
+                <button
+                  onClick={startAssessment}
+                  disabled={loading}
+                  className="northstar-button-primary"
+                >
+                  {loading ? "Preparing…" : "Begin assessment"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
     );
   }
@@ -213,8 +327,9 @@ export default function FinalAssessment({
     const passed = outcome?.passed;
     return (
       <section
-        className={`rounded-3xl border bg-white p-7 text-center shadow-sm sm:p-12 ${passed ? "border-emerald-200" : "border-amber-200"}`}
+        className={`relative overflow-hidden rounded-3xl border bg-white p-7 text-center shadow-sm sm:p-12 ${passed ? "border-emerald-200" : "border-amber-200"}`}
       >
+        {passed && <Celebration />}
         <div
           className={`mx-auto grid h-16 w-16 place-items-center rounded-full ${passed ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"}`}
         >
@@ -271,8 +386,8 @@ export default function FinalAssessment({
 
   const question = questions[current];
   return (
-    <section className="overflow-hidden rounded-3xl border border-[#dfe6e1] bg-white shadow-sm">
-      <header className="sticky top-16 z-20 flex items-center gap-4 border-b border-[#dfe6e1] bg-white/95 px-5 py-4 backdrop-blur sm:px-7">
+    <section className="fixed inset-0 z-[100] overflow-y-auto bg-[#f3f6f4]">
+      <header className="sticky top-0 z-20 flex items-center gap-4 border-b border-[#dfe6e1] bg-white/95 px-5 py-4 backdrop-blur sm:px-7">
         <div className="min-w-0 flex-1">
           <p className="text-xs font-bold uppercase tracking-wider text-[#176b4d]">
             Final assessment
@@ -290,7 +405,7 @@ export default function FinalAssessment({
           <ClockIcon className="h-4 w-4" /> {formatRemaining(remaining)}
         </span>
       </header>
-      <div className="grid lg:grid-cols-[1fr_240px]">
+      <div className="mx-auto grid min-h-[calc(100vh-73px)] max-w-[1400px] lg:grid-cols-[minmax(0,1fr)_260px]">
         <div className="p-6 sm:p-9">
           <p className="text-sm font-bold text-[#95a099]">
             Question {current + 1} of {questions.length}
@@ -368,6 +483,35 @@ export default function FinalAssessment({
           </p>
         </aside>
       </div>
+      {exitWarning && (
+        <div
+          className="fixed inset-0 z-[120] grid place-items-center bg-[#09130e]/75 p-5 backdrop-blur-sm"
+          role="alertdialog"
+          aria-modal="true"
+        >
+          <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl">
+            <ExclamationTriangleIcon className="mx-auto h-11 w-11 text-amber-600" />
+            <h2 className="mt-4 text-2xl font-extrabold text-[#15231c]">
+              Stay in focused mode
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-[#637069]">
+              Your attempt to leave was recorded. Your answers and timer are
+              still active.
+            </p>
+            <button
+              onClick={async () => {
+                setExitWarning(false);
+                await document.documentElement
+                  .requestFullscreen?.()
+                  .catch(() => {});
+              }}
+              className="northstar-button-primary mt-6 w-full"
+            >
+              Return to assessment
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

@@ -16,7 +16,7 @@ export async function POST(request) {
     if (!email || !password) {
       return NextResponse.json(
         { message: "Email and password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -26,7 +26,7 @@ export async function POST(request) {
     if (!user || !(await bcryptjs.compare(password, user.password))) {
       return NextResponse.json(
         { message: "Invalid email or password" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -37,7 +37,7 @@ export async function POST(request) {
     response.cookies.set(
       SESSION_COOKIE,
       createSessionToken(user),
-      sessionCookieOptions()
+      sessionCookieOptions(),
     );
 
     return response;

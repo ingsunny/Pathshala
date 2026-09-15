@@ -11,15 +11,15 @@ function SessionBootstrap() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
 
     async function loadSession() {
       try {
         const response = await fetch("/api/session", {
           cache: "no-store",
-          signal: controller.signal,
         });
 
+        if (!active) return;
         if (response.ok) {
           const data = await response.json();
           dispatch(signInSuccess(data.user));
@@ -33,16 +33,18 @@ function SessionBootstrap() {
 
     loadSession();
 
-    fetch("/api/get_course", { cache: "no-store", signal: controller.signal })
+    fetch("/api/get_course", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
-        if (data?.courses) dispatch(loadCourses(data.courses));
+        if (active && data?.courses) dispatch(loadCourses(data.courses));
       })
       .catch((error) => {
         if (error.name !== "AbortError") console.error("Course loading failed");
       });
 
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, [dispatch]);
 
   return null;

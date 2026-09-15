@@ -14,7 +14,10 @@ export async function POST(request) {
 
     const { courseId } = await request.json();
     if (!courseId) {
-      return NextResponse.json({ message: "Course is required" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Course is required" },
+        { status: 400 },
+      );
     }
 
     await connect();
@@ -24,11 +27,19 @@ export async function POST(request) {
     ]);
 
     if (!user || !course) {
-      return NextResponse.json({ message: "User or course not found" }, { status: 404 });
+      return NextResponse.json(
+        { message: "User or course not found" },
+        { status: 404 },
+      );
     }
 
-    if (user.enrollments.some((item) => item.courseId.toString() === courseId)) {
-      return NextResponse.json({ message: "Already enrolled" }, { status: 409 });
+    if (
+      user.enrollments.some((item) => item.courseId.toString() === courseId)
+    ) {
+      return NextResponse.json(
+        { message: "Already enrolled" },
+        { status: 409 },
+      );
     }
 
     user.enrollments.push({ courseId: course._id });

@@ -13,13 +13,15 @@ export async function GET(request) {
     }
 
     await connect();
-    const certificates = await Certificate.find({ user_id: session.sub }).lean();
+    const certificates = await Certificate.find({
+      user_id: session.sub,
+    }).lean();
     return NextResponse.json({ certificates });
   } catch (error) {
     console.error("Certificate lookup failed", error);
     return NextResponse.json(
       { message: "Unable to load certificates" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

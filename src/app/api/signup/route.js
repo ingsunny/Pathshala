@@ -11,12 +11,13 @@ import { getUserView } from "@/lib/user-view";
 
 export async function POST(request) {
   try {
-    const { firstName, lastName, email, password, phone } = await request.json();
+    const { firstName, lastName, email, password, phone } =
+      await request.json();
 
     if (!firstName || !lastName || !email || !password) {
       return NextResponse.json(
         { message: "Please complete all required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -28,8 +29,11 @@ export async function POST(request) {
       !/[^A-Za-z0-9]/.test(password)
     ) {
       return NextResponse.json(
-        { message: "Password must include upper and lowercase letters, a number, and a symbol" },
-        { status: 400 }
+        {
+          message:
+            "Password must include upper and lowercase letters, a number, and a symbol",
+        },
+        { status: 400 },
       );
     }
 
@@ -40,7 +44,7 @@ export async function POST(request) {
     if (existingUser) {
       return NextResponse.json(
         { message: "An account with this email already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -53,12 +57,12 @@ export async function POST(request) {
 
     const response = NextResponse.json(
       { message: "Account created", user: await getUserView(user) },
-      { status: 201 }
+      { status: 201 },
     );
     response.cookies.set(
       SESSION_COOKIE,
       createSessionToken(user),
-      sessionCookieOptions()
+      sessionCookieOptions(),
     );
 
     return response;
@@ -66,7 +70,7 @@ export async function POST(request) {
     console.error("Signup failed", error);
     return NextResponse.json(
       { message: "Unable to create account" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
