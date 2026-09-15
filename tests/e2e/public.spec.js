@@ -21,6 +21,10 @@ test("landing page presents the learning catalog", async ({ page }) => {
   await expect(hero).not.toHaveAttribute("src", firstPreview, {
     timeout: 6500,
   });
+  await expect(page.getByText(/Auto · 5s|Paused/i)).toHaveCount(0);
+  await expect(
+    page.getByLabel("Course learning previews").getByRole("button"),
+  ).toHaveCount(3);
 
   await page.getByRole("button", { name: "Use dark theme" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");

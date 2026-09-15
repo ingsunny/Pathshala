@@ -160,9 +160,25 @@ export default function HomePage() {
             <div className="absolute -inset-8 rounded-full bg-[#d9eee1]/65 blur-3xl" />
             <div className="relative rounded-[26px] border border-[#dce6df] bg-white p-4 shadow-[0_28px_80px_rgba(26,57,44,.14)]">
               <div className="flex items-center gap-1.5 px-1 pb-4">
-                <i className="h-2 w-2 rounded-full bg-[#dfe6e1]" />
-                <i className="h-2 w-2 rounded-full bg-[#dfe6e1]" />
-                <i className="h-2 w-2 rounded-full bg-[#dfe6e1]" />
+                {Array.from(
+                  { length: Math.max(heroSlides.length, 3) },
+                  (_, index) => {
+                    const active = index === heroIndex % heroSlides.length;
+                    return (
+                      <button
+                        key={`${index}-${active ? heroIndex : "idle"}`}
+                        type="button"
+                        onClick={() =>
+                          index < heroSlides.length && setHeroIndex(index)
+                        }
+                        disabled={index >= heroSlides.length}
+                        className={`relative h-2 overflow-hidden rounded-full transition-all ${active ? `w-7 ${heroPaused ? "bg-[#176b4d]" : "northstar-hero-dot-active bg-[#dfe6e1]"}` : "w-2 bg-[#dfe6e1] hover:bg-[#b9c9c0]"}`}
+                        aria-label={`Show course preview ${index + 1}`}
+                        aria-current={active ? "true" : undefined}
+                      />
+                    );
+                  },
+                )}
                 <span className="ml-auto text-[11px] font-bold uppercase tracking-wider text-[#849088]">
                   Learning workspace
                 </span>
@@ -208,24 +224,6 @@ export default function HomePage() {
                     className="h-full rounded-full bg-[#176b4d] transition-all duration-500"
                     style={{ width: `${heroProgress}%` }}
                   />
-                </div>
-                <div className="mt-4 flex items-center justify-center gap-2">
-                  {heroSlides.map((slide, index) => (
-                    <button
-                      key={slide.id || index}
-                      onClick={() => setHeroIndex(index)}
-                      className={`h-2 rounded-full transition-all ${index === heroIndex % heroSlides.length ? "w-7 bg-[#176b4d]" : "w-2 bg-[#c9d5ce] hover:bg-[#8da99a]"}`}
-                      aria-label={`Show course preview ${index + 1}`}
-                      aria-current={
-                        index === heroIndex % heroSlides.length
-                          ? "true"
-                          : undefined
-                      }
-                    />
-                  ))}
-                  <span className="ml-2 text-[10px] font-bold uppercase tracking-wider text-[#849088]">
-                    {heroPaused ? "Paused" : "Auto · 5s"}
-                  </span>
                 </div>
               </div>
             </div>

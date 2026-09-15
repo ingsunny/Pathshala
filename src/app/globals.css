@@ -170,6 +170,25 @@ body.assessment-active .northstar-floating-tools {
   }
 }
 
+.northstar-hero-dot-active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #176b4d;
+  transform-origin: left;
+  animation: northstar-hero-dot-progress 5s linear both;
+}
+
+@keyframes northstar-hero-dot-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 @layer components {
   .northstar-shell {
     width: min(1180px, calc(100% - 40px));
