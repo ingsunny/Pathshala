@@ -12,13 +12,15 @@ test("landing page presents the learning catalog", async ({ page }) => {
     page.getByRole("heading", { name: /Learning, without the noise/i }),
   ).toBeVisible();
   await expect(page.locator("#courses")).toBeVisible();
-  const hero = page.getByAltText(
-    "Professionals learning together around a laptop",
-  );
+  const hero = page.getByLabel("Course learning previews").locator("img");
   await expect(hero).toBeVisible();
   await expect
     .poll(() => hero.evaluate((image) => image.naturalWidth))
     .toBeGreaterThan(0);
+  const firstPreview = await hero.getAttribute("src");
+  await expect(hero).not.toHaveAttribute("src", firstPreview, {
+    timeout: 6500,
+  });
 
   await page.getByRole("button", { name: "Use dark theme" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");

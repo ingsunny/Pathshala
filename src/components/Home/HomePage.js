@@ -10,6 +10,7 @@ import {
   PlayIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -65,6 +66,48 @@ function CourseCard({ course }) {
 
 export default function HomePage() {
   const courses = useSelector((state) => state.courses.courses);
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
+  const heroSlides = courses.length
+    ? courses.map((course, index) => {
+        const topics =
+          course.syllabus?.flatMap((chapter) => chapter.topics) || [];
+        const completed = Math.min(topics.length, [7, 12, 16][index % 3]);
+        return {
+          id: course._id,
+          image: course.img2 || course.img1,
+          category: course.category,
+          title:
+            topics[index % Math.max(topics.length, 1)]?.topicName ||
+            course.name,
+          completed,
+          total: topics.length || 20,
+        };
+      })
+    : [
+        {
+          id: null,
+          image: "/images/northstar-learning-hero.png",
+          category: "Continue learning",
+          title: "How Python programs work",
+          completed: 12,
+          total: 20,
+        },
+      ];
+  const heroSlide = heroSlides[heroIndex % heroSlides.length];
+  const heroProgress = Math.round(
+    (heroSlide.completed / heroSlide.total) * 100,
+  );
+
+  useEffect(() => {
+    if (heroPaused || heroSlides.length < 2) return;
+    const timer = setInterval(
+      () => setHeroIndex((index) => (index + 1) % heroSlides.length),
+      5000,
+    );
+    return () => clearInterval(timer);
+  }, [heroPaused, heroSlides.length]);
+
   return (
     <div className="bg-[#fbfcf8] text-[#15231c]">
       <Header />
@@ -102,7 +145,18 @@ export default function HomePage() {
               </span>
             </div>
           </div>
-          <div className="relative mx-auto w-full max-w-lg">
+          <div
+            className="relative mx-auto w-full max-w-lg"
+            onMouseEnter={() => setHeroPaused(true)}
+            onMouseLeave={() => setHeroPaused(false)}
+            onFocusCapture={() => setHeroPaused(true)}
+            onBlurCapture={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget))
+                setHeroPaused(false);
+            }}
+            aria-roledescription="carousel"
+            aria-label="Course learning previews"
+          >
             <div className="absolute -inset-8 rounded-full bg-[#d9eee1]/65 blur-3xl" />
             <div className="relative rounded-[26px] border border-[#dce6df] bg-white p-4 shadow-[0_28px_80px_rgba(26,57,44,.14)]">
               <div className="flex items-center gap-1.5 px-1 pb-4">
@@ -115,32 +169,63 @@ export default function HomePage() {
               </div>
               <div className="relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-[19px] bg-gradient-to-br from-[#176b4d] to-[#102d22] p-7 text-white">
                 <ExternalImage
-                  src="/images/northstar-learning-hero.png"
-                  alt="Professionals learning together around a laptop"
-                  className="absolute inset-0 h-full w-full object-cover"
+                  key={heroSlide.image}
+                  src={heroSlide.image}
+                  alt={`${heroSlide.title} lesson preview`}
+                  className="northstar-slide-in absolute inset-0 h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#10281f] via-[#10281f]/35 to-transparent" />
                 <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border-[50px] border-white/10" />
                 <span className="relative text-xs font-bold uppercase tracking-[.16em] text-[#a9d8c0]">
-                  Continue learning
+                  {heroSlide.category}
                 </span>
                 <strong className="relative mt-3 max-w-xs text-3xl leading-tight">
-                  How Python programs work
+                  {heroSlide.title}
                 </strong>
-                <div className="relative mt-8 flex items-center gap-3">
+                <Link
+                  href={
+                    heroSlide.id
+                      ? `/categories/${heroSlide.id}`
+                      : "/search_courses"
+                  }
+                  className="relative mt-8 flex w-fit items-center gap-3 rounded-full pr-4 focus-visible:outline-white"
+                >
                   <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-[#176b4d]">
                     <PlayIcon className="ml-0.5 h-5 w-5" />
                   </span>
                   <span className="text-sm font-semibold">Resume lesson</span>
-                </div>
+                </Link>
               </div>
               <div className="px-2 pb-2 pt-5">
                 <div className="flex justify-between text-xs font-semibold text-[#637069]">
-                  <span>12 of 20 lessons</span>
-                  <span>60%</span>
+                  <span>
+                    {heroSlide.completed} of {heroSlide.total} lessons
+                  </span>
+                  <span>{heroProgress}%</span>
                 </div>
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#eaf0ec]">
-                  <div className="h-full w-3/5 rounded-full bg-[#176b4d]" />
+                  <div
+                    className="h-full rounded-full bg-[#176b4d] transition-all duration-500"
+                    style={{ width: `${heroProgress}%` }}
+                  />
+                </div>
+                <div className="mt-4 flex items-center justify-center gap-2">
+                  {heroSlides.map((slide, index) => (
+                    <button
+                      key={slide.id || index}
+                      onClick={() => setHeroIndex(index)}
+                      className={`h-2 rounded-full transition-all ${index === heroIndex % heroSlides.length ? "w-7 bg-[#176b4d]" : "w-2 bg-[#c9d5ce] hover:bg-[#8da99a]"}`}
+                      aria-label={`Show course preview ${index + 1}`}
+                      aria-current={
+                        index === heroIndex % heroSlides.length
+                          ? "true"
+                          : undefined
+                      }
+                    />
+                  ))}
+                  <span className="ml-2 text-[10px] font-bold uppercase tracking-wider text-[#849088]">
+                    {heroPaused ? "Paused" : "Auto · 5s"}
+                  </span>
                 </div>
               </div>
             </div>

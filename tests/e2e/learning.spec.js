@@ -111,12 +111,15 @@ test("dashboard and course flow work without stale content", async ({
 test("completed video offers and performs five-second auto-advance", async ({
   page,
 }) => {
-  await createEnrolledLearner(page);
-  await page.goto("/dashboard");
-  await page
-    .getByRole("link", { name: /start course|resume course/i })
-    .first()
-    .click();
+  const { course } = await createEnrolledLearner(page);
+  const slug = course.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  await page.goto(`/dashboard/screen/${slug}/${course._id}`);
+  await expect(page.getByLabel(/video player/i)).toBeVisible({
+    timeout: 15_000,
+  });
 
   const nextButton = page.getByRole("button", { name: /Complete & next/i });
   await expect(nextButton).toBeVisible();
@@ -154,17 +157,15 @@ test("final assessment is locked, graded on the server, and issues a local certi
   const topicIds = canonicalCourse.syllabus.flatMap((chapter) =>
     chapter.topics.map((topic) => topic._id),
   );
-  await database
-    .collection("users")
-    .updateOne(
-      { email },
-      {
-        $set: {
-          "enrollments.0.completedTopicIds": topicIds,
-          "enrollments.0.progressPercent": 100,
-        },
+  await database.collection("users").updateOne(
+    { email },
+    {
+      $set: {
+        "enrollments.0.completedTopicIds": topicIds,
+        "enrollments.0.progressPercent": 100,
       },
-    );
+    },
+  );
   const start = await page.request.post("/api/assessment", {
     data: { action: "start", courseId: course._id },
   });
